@@ -1,0 +1,18 @@
+{
+  "name": "hardhat-boilerplate",
+  "version": "1.0.0",
+  "description": "hardhat and ethersjs minimal boilerplate for Dapp development",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat deploy"
+  },
+  "keywords": [],
+  "author": "Salman Dabbakuti",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^2.0.1",
+    "hardhat": "^2.12.6"
+  }
+}
