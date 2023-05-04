@@ -4,16 +4,9 @@ type Stream @entity {
   receiver: String!
   token: String!
   flowRate: BigInt!
-  status: StreamStatus!
   txHash: String!
   createdAt: BigInt!
   updatedAt: BigInt!
-}
-
-enum StreamStatus {
-  CREATED
-  UPDATED 
-  TERMINATED
 }
 
 type StreamRevision @entity {
@@ -29,17 +22,5 @@ type StreamRevision @entity {
     Note: The `revisionIndex` property may not be the same as the `revisionIndex` of `mostRecentStream`. Which means `mostRecentStream` has been closed and no new stream has been opened.
     """
     mostRecentStream: Stream!
-}
-
-type EpnsNotificationCounter @entity {
-  id: ID!
-  totalCount: BigInt!
-}
-
-type EpnsPushNotification @entity {
-  id: ID!
-  notificationNumber: BigInt!
-  recipient: String!
-  notification: String!
 }
 

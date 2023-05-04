@@ -17,6 +17,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Stream
+        - StreamRevision
       abis:
         - name: CFAV1
           file: ./abis/CFAV1.json

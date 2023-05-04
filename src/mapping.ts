@@ -1,16 +1,6 @@
-import { BigInt, Address, ethereum, crypto, Bytes } from "@graphprotocol/graph-ts";
+import { Address, ethereum, crypto, Bytes } from "@graphprotocol/graph-ts";
 import { FlowUpdated as FlowUpdatedEvent } from "../generated/Superfluid/Superfluid";
 import { Stream, StreamRevision } from "../generated/schema";
-
-let ZERO_BI = BigInt.fromI32(0);
-
-function getFlowStatus(
-  currentFlowRate: BigInt
-): string {
-  return currentFlowRate.equals(ZERO_BI)
-    ? "TERMINATED"
-    : "UPDATED";
-}
 
 function getStreamID(
   senderAddress: Address,
@@ -94,10 +84,8 @@ export function handleFlowUpdated(event: FlowUpdatedEvent): void {
   streamRevision.save();
 
   let stream = Stream.load(streamId);
-  // if stream is newly created, status should be CREATED
-  // else get the status from the current flow rate
-  const streamStatus = stream == null ? "CREATED" : getFlowStatus(event.params.flowRate);
   const currentTimestamp = event.block.timestamp;
+
   if (stream == null) {
     stream = new Stream(streamId);
     stream.sender = event.params.sender.toHex();
@@ -106,7 +94,6 @@ export function handleFlowUpdated(event: FlowUpdatedEvent): void {
     stream.createdAt = currentTimestamp;
     stream.txHash = event.transaction.hash.toHex();
   }
-  stream.status = streamStatus;
   stream.updatedAt = currentTimestamp;
   stream.flowRate = event.params.flowRate;
   stream.save();
