@@ -1,0 +1,45 @@
+type Stream @entity {
+  id: ID!
+  sender: String!
+  receiver: String!
+  token: String!
+  flowRate: BigInt!
+  status: StreamStatus!
+  txHash: String!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+}
+
+enum StreamStatus {
+  CREATED
+  UPDATED 
+  TERMINATED
+}
+
+type StreamRevision @entity {
+    """
+    ID composed of: keccak256(abi.encode(sender,receiver))-tokenAddress
+    """
+    id: ID!
+    revisionIndex: Int!
+    periodRevisionIndex: Int!
+
+    """
+    The "most recently alive" stream between a sender and receiver.
+    Note: The `revisionIndex` property may not be the same as the `revisionIndex` of `mostRecentStream`. Which means `mostRecentStream` has been closed and no new stream has been opened.
+    """
+    mostRecentStream: Stream!
+}
+
+type EpnsNotificationCounter @entity {
+  id: ID!
+  totalCount: BigInt!
+}
+
+type EpnsPushNotification @entity {
+  id: ID!
+  notificationNumber: BigInt!
+  recipient: String!
+  notification: String!
+}
+

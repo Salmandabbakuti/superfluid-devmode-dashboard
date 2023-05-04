@@ -4,13 +4,22 @@
   "description": "hardhat and ethersjs minimal boilerplate for Dapp development",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test",
-    "compile": "npx hardhat compile",
-    "deploy": "npx hardhat deploy"
+    "contracts:compile": "npx hardhat compile",
+    "contracts:deploy": "npx hardhat deploy",
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ salmandabbakuti/superfluid-devmode-dashboard",
+    "create-local": "graph create --node http://localhost:8020/ salmandabbakuti/superfluid-devmode-dashboard",
+    "remove-local": "graph remove --node http://localhost:8020/ salmandabbakuti/superfluid-devmode-dashboard",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 salmandabbakuti/superfluid-devmode-dashboard"
   },
   "keywords": [],
   "author": "Salman Dabbakuti",
   "license": "ISC",
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.48.0",
+    "@graphprotocol/graph-ts": "0.29.3"
+  },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
     "hardhat": "^2.12.6"
