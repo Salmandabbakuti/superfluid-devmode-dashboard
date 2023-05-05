@@ -25,6 +25,8 @@ import {
   DeleteOutlined
 } from "@ant-design/icons";
 
+import addresses from "./addresses.json";
+
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
 
@@ -37,30 +39,23 @@ const tokens = [
   {
     name: "fDAIx",
     symbol: "fDAIx",
-    address: "0xf2d68898557ccb2cf4c10c3ef2b034b2a69dad00",
+    address: addresses.fdaix,
     icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public//tokens/dai/icon.svg"
+      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/dai/icon.svg"
   },
   {
     name: "fUSDCx",
     symbol: "fUSDCx",
-    address: "0x8ae68021f6170e5a766be613cea0d75236ecca9a",
+    address: addresses.fusdcx,
     icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public//tokens/usdc/icon.svg"
+      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/usdc/icon.svg"
   },
   {
     name: "fTUSDx",
     symbol: "fTUSDx",
-    address: "0x95697ec24439e3eb7ba588c7b279b9b369236941",
+    address: addresses.ftusdx,
     icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public//tokens/tusd/icon.svg"
-  },
-  {
-    name: "ETHx",
-    symbol: "ETHx",
-    address: "0x5943f705abb6834cad767e6e4bb258bc48d9c947",
-    icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public//tokens/eth/icon.svg"
+      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/tusd/icon.svg"
   }
 ];
 
@@ -71,6 +66,16 @@ const calculateFlowRateInTokenPerMonth = (amount) => {
   // if flowRate is floating point number, remove unncessary trailing zeros
   return flowRate.replace(/\.?0+$/, "");
 };
+
+const calculateFlowRateInWeiPerSecond = (amount) => {
+  // convert amount from token/month to wei/second for sending to superfluid
+  const flowRateInWeiPerSecond = ethers.utils
+    .parseEther(amount.toString())
+    .div(2592000)
+    .toString();
+  return flowRateInWeiPerSecond;
+};
+
 
 const STREAMS_QUERY = gql`
   query getStreams(
@@ -104,6 +109,7 @@ export default function Home() {
   const [provider, setProvider] = useState(null);
   const [chainId, setChainId] = useState(null);
   const [streams, setStreams] = useState([]);
+  const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
   const [loading, setLoading] = useState(false);
   const [superfluidSdk, setSuperfluidSdk] = useState(null);
   const [paginationOptions, setPaginationOptions] = useState({
@@ -163,7 +169,9 @@ export default function Home() {
       };
       const sf = await Framework.create({
         chainId,
-        provider
+        provider,
+        resolverAddress: addresses.resolver,
+        protocolReleaseVersion: "test"
       });
       setSuperfluidSdk(sf);
       setProvider(provider);
@@ -516,6 +524,73 @@ export default function Home() {
           >
             {provider ? (
               <div>
+                {/* Create Stream Section Starts */}
+                <Card className="new-post-card-container" title="Send Stream">
+                  <Input
+                    type="text"
+                    placeholder="Receiver Wallet Address"
+                    name="receiver"
+                    value={streamInput.receiver || ""}
+                    onChange={(e) =>
+                      setStreamInput({
+                        ...streamInput,
+                        receiver: e.target.value
+                      })
+                    }
+                    style={{
+                      borderRadius: 10,
+                      marginBottom: 10,
+                      width: "100"
+                    }}
+                  />
+                  <Space>
+                    <label htmlFor="token">Select Token:</label>
+                    <Select
+                      defaultValue={tokens[0].symbol}
+                      name="token"
+                      id="token"
+                      value={streamInput?.token || tokens[0].address}
+                      style={{
+                        borderRadius: 10,
+                        marginBottom: 10
+                      }}
+                      onChange={(val) =>
+                        setStreamInput({ ...streamInput, token: val })
+                      }
+                    >
+                      {tokens.map((token, i) => (
+                        <Select.Option value={token.address} key={i}>
+                          <Avatar shape="circle" size="small" src={token.icon} />{" "}
+                          {token.symbol}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                    {/*  add flowrate input */}
+                    <InputNumber
+                      name="flowRate"
+                      addonAfter="/month"
+                      placeholder="Flow Rate"
+                      value={streamInput?.flowRate || 0}
+                      onChange={(val) =>
+                        setStreamInput({ ...streamInput, flowRate: val })
+                      }
+                      style={{
+                        borderRadius: 10,
+                        marginBottom: 10
+                        // width: 120
+                      }}
+                    />
+                  </Space>
+                  <Button
+                    type="primary"
+                    shape="round"
+                    style={{ marginTop: 10 }}
+                    onClick={() => handleCreateStream(streamInput)}
+                  >
+                    Send Stream
+                  </Button>
+                </Card>
+                {/* Create Stream Section Ends */}
                 {/* Streams Table Starts */}
                 <h2>My Streams</h2>
                 <Space>

@@ -12,7 +12,7 @@ async function main() {
 
   // initialize framework
   const sf = await Framework.create({
-    chainId: 1337,
+    chainId: 31337,
     provider,
     resolverAddress: contractsFramework.resolver,
     protocolReleaseVersion: "test"
@@ -36,99 +36,99 @@ async function main() {
   );
 
   await superTokenDeployer.deployWrapperSuperToken(
-    "Fake USDT Token",
-    "fUSDT",
+    "Fake TUSD Token",
+    "fTUSD",
     18,
     ethers.utils.parseEther("100000000").toString()
   );
 
   const thousandEther = ethers.utils.parseEther("10000");
 
-  console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fUSDTx] to all accounts");
+  console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fTUSDx] to all accounts");
   // load wrapper tokens and mint to all accounts
-  const daix = await sf.loadSuperToken("fDAIx");
-  const dai = new ethers.Contract(daix.underlyingToken.address, TestToken.abi, owner);
+  const fdaix = await sf.loadSuperToken("fDAIx");
+  const fdai = new ethers.Contract(fdaix.underlyingToken.address, TestToken.abi, owner);
 
-  const usdcx = await sf.loadSuperToken("fUSDCx");
-  const usdc = new ethers.Contract(usdcx.underlyingToken.address, TestToken.abi, owner);
+  const fusdcx = await sf.loadSuperToken("fUSDCx");
+  const fusdc = new ethers.Contract(fusdcx.underlyingToken.address, TestToken.abi, owner);
 
-  const usdtx = await sf.loadSuperToken("fUSDTx");
-  const usdt = new ethers.Contract(usdtx.underlyingToken.address, TestToken.abi, owner);
+  const ftusdx = await sf.loadSuperToken("fTUSDx");
+  const ftusd = new ethers.Contract(ftusdx.underlyingToken.address, TestToken.abi, owner);
 
 
 
   // minting and wrapping test DAI to all accounts
-  await dai.mint(owner.address, thousandEther);
-  await dai.mint(account1.address, thousandEther);
-  await dai.mint(account2.address, thousandEther);
+  await fdai.mint(owner.address, thousandEther);
+  await fdai.mint(account1.address, thousandEther);
+  await fdai.mint(account2.address, thousandEther);
 
   // minting and wrapping test USDC to all accounts
-  await usdc.mint(owner.address, thousandEther);
-  await usdc.mint(account1.address, thousandEther);
-  await usdc.mint(account2.address, thousandEther);
+  await fusdc.mint(owner.address, thousandEther);
+  await fusdc.mint(account1.address, thousandEther);
+  await fusdc.mint(account2.address, thousandEther);
 
-  // minting and wrapping test USDT to all accounts
-  await usdt.mint(owner.address, thousandEther);
-  await usdt.mint(account1.address, thousandEther);
-  await usdt.mint(account2.address, thousandEther);
+  // minting and wrapping test TUSD to all accounts
+  await ftusd.mint(owner.address, thousandEther);
+  await ftusd.mint(account1.address, thousandEther);
+  await ftusd.mint(account2.address, thousandEther);
 
   // approving DAIx to spend DAI (Super Token object is not an ethers contract object and has different operation syntax)
-  await dai.approve(daix.address, ethers.constants.MaxInt256);
-  await dai.connect(account1).approve(daix.address, ethers.constants.MaxInt256);
-  await dai.connect(account2).approve(daix.address, ethers.constants.MaxInt256);
+  await fdai.approve(fdaix.address, thousandEther);
+  await fdai.connect(account1).approve(fdaix.address, thousandEther);
+  await fdai.connect(account2).approve(fdaix.address, thousandEther);
   // Upgrading all DAI to DAIx
-  const ownerUpgradeDAI = daix.upgrade({ amount: thousandEther });
-  const account1UpgradeDAI = daix.upgrade({ amount: thousandEther });
-  const account2UpgradeDAI = daix.upgrade({ amount: thousandEther });
+  const ownerUpgradeDAI = fdaix.upgrade({ amount: thousandEther });
+  const account1UpgradeDAI = fdaix.upgrade({ amount: thousandEther });
+  const account2UpgradeDAI = fdaix.upgrade({ amount: thousandEther });
 
   await ownerUpgradeDAI.exec(owner);
   await account1UpgradeDAI.exec(account1);
   await account2UpgradeDAI.exec(account2);
 
   // approving USDCx to spend USDC (Super Token object is not an ethers contract object and has different operation syntax)
-  await usdc.approve(usdcx.address, ethers.constants.MaxInt256);
-  await usdc.connect(account1).approve(usdcx.address, ethers.constants.MaxInt256);
-  await usdc.connect(account2).approve(usdcx.address, ethers.constants.MaxInt256);
+  await fusdc.approve(fusdcx.address, thousandEther);
+  await fusdc.connect(account1).approve(fusdcx.address, thousandEther);
+  await fusdc.connect(account2).approve(fusdcx.address, thousandEther);
   // Upgrading all USDC to USDCx
-  const ownerUpgradeUSDC = usdcx.upgrade({ amount: thousandEther });
-  const account1UpgradeUSDC = usdcx.upgrade({ amount: thousandEther });
-  const account2UpgradeUSDC = usdcx.upgrade({ amount: thousandEther });
+  const ownerUpgradeUSDC = fusdcx.upgrade({ amount: thousandEther });
+  const account1UpgradeUSDC = fusdcx.upgrade({ amount: thousandEther });
+  const account2UpgradeUSDC = fusdcx.upgrade({ amount: thousandEther });
 
   await ownerUpgradeUSDC.exec(owner);
   await account1UpgradeUSDC.exec(account1);
   await account2UpgradeUSDC.exec(account2);
 
-  // approving USDTx to spend USDT (Super Token object is not an ethers contract object and has different operation syntax)
-  await usdt.approve(usdtx.address, ethers.constants.MaxInt256);
-  await usdt.connect(account1).approve(usdtx.address, ethers.constants.MaxInt256);
-  await usdt.connect(account2).approve(usdtx.address, ethers.constants.MaxInt256);
-  // Upgrading all USDT to USDTx
-  const ownerUpgradeUSDT = usdtx.upgrade({ amount: thousandEther });
-  const account1UpgradeUSDT = usdtx.upgrade({ amount: thousandEther });
-  const account2UpgradeUSDT = usdtx.upgrade({ amount: thousandEther });
+  // approving TUSDx to spend TUSD (Super Token object is not an ethers contract object and has different operation syntax)
+  await ftusd.approve(ftusdx.address, thousandEther);
+  await ftusd.connect(account1).approve(ftusdx.address, thousandEther);
+  await ftusd.connect(account2).approve(ftusdx.address, thousandEther);
+  // Upgrading all TUSD to TUSDx
+  const ownerUpgradeTUSD = ftusdx.upgrade({ amount: thousandEther });
+  const account1UpgradeTUSD = ftusdx.upgrade({ amount: thousandEther });
+  const account2UpgradeTUSD = ftusdx.upgrade({ amount: thousandEther });
 
-  await ownerUpgradeUSDT.exec(owner);
-  await account1UpgradeUSDT.exec(account1);
-  await account2UpgradeUSDT.exec(account2);
+  await ownerUpgradeTUSD.exec(owner);
+  await account1UpgradeTUSD.exec(account1);
+  await account2UpgradeTUSD.exec(account2);
 
   console.log("[INFO]: Copying addresses to local file");
 
   // store token addresses, cfav1 address in local file
   const addresses = {
-    daix: daix.address,
-    dai: dai.address,
-    usdcx: usdcx.address,
-    usdc: usdc.address,
-    usdtx: usdtx.address,
-    usdt: usdt.address,
+    fdaix: fdaix.address,
+    fdai: fdai.address,
+    fusdcx: fusdcx.address,
+    fusdc: fusdc.address,
+    ftusdx: ftusdx.address,
+    ftusd: ftusd.address,
     host: contractsFramework.host,
     cfa: contractsFramework.cfa,
     resolver: contractsFramework.resolver,
     cfav1: contractsFramework.cfaV1Forwarder
   };
-  fs.writeFileSync("./addresses.json", JSON.stringify(addresses, null, 2));
+  fs.writeFileSync("./client/app/addresses.json", JSON.stringify(addresses, null, 2));
 
-  console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fUSDTx]");
+  console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fTUSDx]");
 }
 
 main()

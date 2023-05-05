@@ -13,7 +13,7 @@ module.exports = {
   defaultNetwork: "local",
   networks: {
     hardhat: {
-      chainId: 1337
+      chainId: 31337
     },
     local: {
       url: "http://127.0.0.1:8545",
