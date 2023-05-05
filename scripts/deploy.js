@@ -11,7 +11,7 @@ async function main() {
 
   // initialize framework
   const sf = await Framework.create({
-    chainId: 31337,
+    chainId: 1337,
     provider: owner.provider,
     resolverAddress: contractsFramework.resolver,
     protocolReleaseVersion: "test"
