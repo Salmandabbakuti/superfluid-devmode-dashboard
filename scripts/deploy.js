@@ -8,16 +8,18 @@ async function main() {
   const [owner, account1, account2] = await ethers.getSigners();
   const { frameworkDeployer, superTokenDeployer } = await deployTestFramework();
   const contractsFramework = await frameworkDeployer.getFramework();
+  const provider = ethers.provider;
 
   // initialize framework
   const sf = await Framework.create({
     chainId: 1337,
-    provider: owner.provider,
+    provider,
     resolverAddress: contractsFramework.resolver,
     protocolReleaseVersion: "test"
   });
 
   // deploy wrapper tokens dai,usdc,usdt and store addresses in local file
+  console.log("[INFO]: Deploying wrapper tokens [fDAIx, fUSDCx, fUSDTx]");
 
   await superTokenDeployer.deployWrapperSuperToken(
     "Fake DAI Token",
@@ -41,6 +43,8 @@ async function main() {
   );
 
   const thousandEther = ethers.utils.parseEther("10000");
+
+  console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fUSDTx] to all accounts");
   // load wrapper tokens and mint to all accounts
   const daix = await sf.loadSuperToken("fDAIx");
   const dai = new ethers.Contract(daix.underlyingToken.address, TestToken.abi, owner);
@@ -107,6 +111,8 @@ async function main() {
   await account1UpgradeUSDT.exec(account1);
   await account2UpgradeUSDT.exec(account2);
 
+  console.log("[INFO]: Copying addresses to local file");
+
   // store token addresses, cfav1 address in local file
   const addresses = {
     daix: daix.address,
@@ -121,6 +127,8 @@ async function main() {
     cfav1: contractsFramework.cfaV1Forwarder
   };
   fs.writeFileSync("./addresses.json", JSON.stringify(addresses, null, 2));
+
+  console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fUSDTx]");
 }
 
 main()

@@ -99,52 +99,6 @@ const STREAMS_QUERY = gql`
   }
 `;
 
-const options = {
-  chart: {
-    type: "networkgraph",
-    height: "50%"
-  },
-  title: {
-    text: "The Indo-European Language Tree",
-    align: "left"
-  },
-  subtitle: {
-    text: "A Force-Directed Network Graph in Highcharts",
-    align: "left"
-  },
-  plotOptions: {
-    networkgraph: {
-      keys: ["from", "to"],
-      layoutAlgorithm: {
-        enableSimulation: true,
-        friction: -0.9
-      }
-    }
-  },
-  series: [
-    {
-      accessibility: {
-        enabled: false
-      },
-      dataLabels: {
-        enabled: true,
-        linkFormat: ""
-      },
-      id: "lang-tree",
-      data: [
-        ["0x734..b9C7Ff", "USDCx"],
-        ["0x734..b9C7Ff", "DAIx"],
-        ["0x734..b9C7Ff", "USDTx"],
-        ["0x734..b9C7Ff", "ETHx"],
-        ["USDCx", "0xc49..g8Jt75"],
-        ["USDTx", "Anatolian"],
-        ["0x734..b9C7Ff", "Indo-Iranian"],
-        ["0x734..b9C7Ff", "Tocharian"]
-      ]
-    }
-  ]
-};
-
 export default function Home() {
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
@@ -170,15 +124,43 @@ export default function Home() {
       console.log("Using account: ", accounts[0]);
       const provider = new providers.Web3Provider(window.ethereum);
       const { chainId } = await provider.getNetwork();
-      if (chainId !== 5) {
-        message.info("Switching to goerli testnet");
-        // switch to the goerli testnet
+      console.log("chainId:", chainId);
+      // switch to local ganache network
+      if (chainId !== 31337) {
+        message.info("Switching to local hardhat network");
+        // switch to the aurora testnet
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x5" }]
+          params: [{ chainId: "0x7A69" }]
+        }).catch(async (err) => {
+          // This error code indicates that the chain has not been added to MetaMask.
+          console.log("err on switch", err);
+          if (err.code === 4902) {
+            message.info("Adding local hardhat network to metamask");
+            // add the aurora testnet
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: "0x7A69",
+                  chainName: "Local Network",
+                  nativeCurrency: {
+                    name: "Ether",
+                    symbol: "ETH",
+                    decimals: 18
+                  },
+                  rpcUrls: ["http://localhost:8545"],
+                  blockExplorerUrls: ["http://localhost:8545"]
+                }
+              ]
+            }).then(() => console.log("Added local hardhat network to metamask"))
+              .catch((err) => {
+                message.error("Failed to add local hardhat network to metamask");
+                console.error(err);
+              });
+          }
         });
-      }
-      console.log("chainId:", chainId);
+      };
       const sf = await Framework.create({
         chainId,
         provider
