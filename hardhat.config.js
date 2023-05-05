@@ -10,10 +10,10 @@ task("deploy", "Deploys Contract", async () => {
 
 module.exports = {
   solidity: "0.8.16",
-  // defaultNetwork: "local",
-  // networks: {
-  //   local: {
-  //     url: "http://127.0.0.1:8545",
-  //   }
-  // }
+  defaultNetwork: "local",
+  networks: {
+    local: {
+      url: "http://127.0.0.1:8545",
+    }
+  }
 };
