@@ -1,5 +1,5 @@
 import { Address, ethereum, crypto, Bytes } from "@graphprotocol/graph-ts";
-import { FlowUpdated as FlowUpdatedEvent } from "../generated/Superfluid/Superfluid";
+import { FlowUpdated as FlowUpdatedEvent } from "../generated/CFAV1/CFAV1";
 import { Stream, StreamRevision } from "../generated/schema";
 
 function getStreamID(
