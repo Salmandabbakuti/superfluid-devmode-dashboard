@@ -39,21 +39,21 @@ const tokens = [
   {
     name: "fDAIx",
     symbol: "fDAIx",
-    address: addresses.fdaix,
+    address: addresses.fdaix.toLowerCase(),
     icon:
       "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/dai/icon.svg"
   },
   {
     name: "fUSDCx",
     symbol: "fUSDCx",
-    address: addresses.fusdcx,
+    address: addresses.fusdcx.toLowerCase(),
     icon:
       "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/usdc/icon.svg"
   },
   {
     name: "fTUSDx",
     symbol: "fTUSDx",
-    address: addresses.ftusdx,
+    address: addresses.ftusdx.toLowerCase(),
     icon:
       "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/tusd/icon.svg"
   }
@@ -109,6 +109,7 @@ export default function Home() {
   const [chainId, setChainId] = useState(null);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
+  const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
   const [loading, setLoading] = useState(false);
   const [superfluidSdk, setSuperfluidSdk] = useState(null);
   const [paginationOptions, setPaginationOptions] = useState({
@@ -189,6 +190,7 @@ export default function Home() {
     flowRate
   }) => {
     console.log("create inputs: ", token, sender, receiver, flowRate);
+    console.log("cfav1", superfluidSdk.cfaV1);
     if (!token || !sender || !receiver || !flowRate)
       return message.error("Please fill all the fields");
     try {
