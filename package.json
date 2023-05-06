@@ -6,7 +6,8 @@
   "scripts": {
     "contracts:compile": "npx hardhat compile",
     "contracts:deploy": "npx hardhat deploy",
-    "codegen": "graph codegen",
+    "prepare:manifest": "mustache client/config/addresses.json subgraph.template.yaml > subgraph.yaml",
+    "codegen": "npm run prepare:manifest && graph codegen",
     "build": "graph build",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ salmandabbakuti/superfluid-devmode-dashboard",
     "create-local": "graph create --node http://localhost:8020/ salmandabbakuti/superfluid-devmode-dashboard",
@@ -24,6 +25,7 @@
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
     "@superfluid-finance/ethereum-contracts": "^1.6.0",
     "@superfluid-finance/sdk-core": "^0.6.3",
-    "hardhat": "^2.14.0"
+    "hardhat": "^2.14.0",
+    "mustache": "^4.2.0"
   }
 }

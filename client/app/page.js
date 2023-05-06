@@ -25,7 +25,7 @@ import {
   DeleteOutlined
 } from "@ant-design/icons";
 
-import addresses from "./addresses.json";
+import addresses from "../config/addresses.json";
 
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
