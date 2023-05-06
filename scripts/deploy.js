@@ -127,7 +127,7 @@ async function main() {
     resolver: contractsFramework.resolver,
     cfav1Forwarder: contractsFramework.cfaV1Forwarder
   };
-  fs.writeFileSync("./client/config/addresses.json", JSON.stringify(addresses, null, 2));
+  fs.writeFileSync("./client/config/contractAddresses.json", JSON.stringify(addresses, null, 2));
 
   console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fTUSDx]");
 }

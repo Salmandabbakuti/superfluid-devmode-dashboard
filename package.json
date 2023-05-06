@@ -6,7 +6,7 @@
   "scripts": {
     "contracts:compile": "npx hardhat compile",
     "contracts:deploy": "npx hardhat deploy",
-    "prepare:manifest": "mustache client/config/addresses.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:manifest": "mustache client/config/contractAddresses.json subgraph.template.yaml > subgraph.yaml",
     "codegen": "npm run prepare:manifest && graph codegen",
     "build": "graph build",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ salmandabbakuti/superfluid-devmode-dashboard",
