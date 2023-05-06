@@ -190,7 +190,6 @@ export default function Home() {
     flowRate
   }) => {
     console.log("create inputs: ", token, sender, receiver, flowRate);
-    console.log("cfav1", superfluidSdk.cfaV1);
     if (!token || !sender || !receiver || !flowRate)
       return message.error("Please fill all the fields");
     try {

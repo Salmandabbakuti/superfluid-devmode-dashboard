@@ -4,8 +4,6 @@
 
 > A dashboard is a way of displaying various types of visual data in one place. Usually, a dashboard is intended to convey different, but related information in an easy-to-digest form. A dashboard is often called a control panel, but the terms are interchangeable.
 
->
-
 The Superfluid Developer-Mode Dashboard is a fullstack application that allows developers to create, update, and delete streams on their local Superfluid instance. The dashboard is designed to be easy to use and can be quickly set up to connect to your local blockchain where Superfluid is deployed. The dashboard provides a centralized location for users to manage all of their streams, view important details, and perform actions on them.
 
 ### Features

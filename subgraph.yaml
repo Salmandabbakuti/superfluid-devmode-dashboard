@@ -1,6 +1,6 @@
 specVersion: 0.0.5
-description: Subgraph for the Superfluid Stream Notifications using Push Protocol
-repository: https://github.com/Salmandabbakuti/superfluid-streams-push
+description: Subgraph for the Superfluid Developer-Mode Dashboad
+repository: https://github.com/Salmandabbakuti/superfluid-devmode-dashboard
 schema:
   file: ./schema.graphql
 dataSources:
