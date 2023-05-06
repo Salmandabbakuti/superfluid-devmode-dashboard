@@ -31,7 +31,7 @@ const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
 
 const client = new GraphQLClient(
-  "https://api.thegraph.com/subgraphs/name/salmandabbakuti/superfluid-stream-push",
+  "http://localhost:8000/subgraphs/name/salmandabbakuti/superfluid-devmode-dashboard",
   { headers: {} }
 );
 
@@ -96,7 +96,6 @@ const STREAMS_QUERY = gql`
       sender
       receiver
       token
-      status
       flowRate
       createdAt
       updatedAt
@@ -432,7 +431,7 @@ export default function Home() {
         <>
           {row.sender === account ? (
             <>
-              {row.status === "TERMINATED" ? (
+              {row.flowRate === "0" ? (
                 <Space>
                   <Tag color="blue">OUTGOING</Tag>
                   <Tag color="red">TERMINATED</Tag>
