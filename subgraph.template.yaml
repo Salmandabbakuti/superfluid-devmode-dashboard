@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum
     name: CFAV1
-    network: mainnet
+    network: localhost
     source:
       address: "{{cfa}}"
       abi: CFAV1

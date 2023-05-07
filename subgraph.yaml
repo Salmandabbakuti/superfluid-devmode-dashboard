@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum
     name: CFAV1
-    network: mainnet
+    network: localhost
     source:
       address: "0xED179b78D5781f93eb169730D8ad1bE7313123F4"
       abi: CFAV1
