@@ -133,7 +133,7 @@ export default function Home() {
         protocolReleaseVersion: "test"
       });
       setSuperfluidSdk(sf);
-      setAccount(wallet.address);
+      setAccount(wallet.address.toLowerCase());
       setProvider(provider);
       message.success("Account connected");
     } catch (err) {
