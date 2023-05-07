@@ -21,7 +21,7 @@ services:
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
       ethereum: 'mainnet:http://host.docker.internal:8545'
-      GRAPH_LOG: info
+      GRAPH_LOG: trace
   ipfs:
     image: ipfs/go-ipfs:v0.10.0
     # restart: always

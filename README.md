@@ -57,7 +57,7 @@ Next, you will need to deploy the Superfluid subgraph locally. Here are the step
 1. Start local docker containers:
 
 ```bash
-docker-compose up
+docker-compose up -d
 ```
 
 2. Generate code for the subgraph:
@@ -90,26 +90,7 @@ npm install
 npm run dev
 ```
 
-3. Import First three accounts from your local blockchain into Metamask. You can do this by copying the private keys from your local blockchain and importing them into Metamask. You can find the private keys in the console where you started your local blockchain.
-
-```
-Accounts
-========
-
-WARNING: These accounts, and their private keys, are publicly known.
-Any funds sent to them on Mainnet or any other live network WILL BE LOST.
-
-Account #0: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 (10000 ETH)
-Private Key: 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-
-Account #1: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 (10000 ETH)
-Private Key: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-
-Account #2: 0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC (10000 ETH)
-Private Key: 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-```
-
-4. Navigate to http://localhost:3000/ and connect your wallet, switch to imported accounts. Now, You can create, update, and delete, view, query, search streams on your local Superfluid instance with ease.
+3. Navigate to http://localhost:3000/ and choose a network to use from dropdown and connect. Now, You can create, update, and delete, view, query, search streams on your local Superfluid instance with ease.
 
 That's it! You are now ready to use the Developer-Mode Dashboard for Superfluid on your local blockchain.
 
