@@ -8,11 +8,11 @@ The Superfluid Developer-Mode Dashboard is a fullstack application that allows d
 
 #### Dashboard
 
-![sdd-dashboard-sc](https://user-images.githubusercontent.com/29351207/236808133-d919b1b9-9ed2-440a-94e6-7140e4e10ebb.png)
+![sdd-dashboard-sc](https://user-images.githubusercontent.com/29351207/236810834-f3ac5d31-0fa0-4124-87a0-b6295b822182.png)
 
 #### Search
 
-![sdd-filter-sc](https://user-images.githubusercontent.com/29351207/236808139-bb7f1ec0-6ab4-4d13-8e47-8b72685d704c.png)
+![sdd-filter-sc](https://user-images.githubusercontent.com/29351207/236810862-a01266ea-18be-4403-aa29-f16e46bd5408.png)
 
 ### Features
 
@@ -111,7 +111,6 @@ That's it! You are now ready to use the Developer-Mode Dashboard for Superfluid 
 - [Hardhat](https://hardhat.org/getting-started/)
 - [Ethers.js](https://docs.ethers.io/v5/)
 - [Next.js](https://nextjs.org/docs/getting-started)
-- [Ant Design](https://ant.design/docs/react/getting-started)
 
 ## Safety
 
