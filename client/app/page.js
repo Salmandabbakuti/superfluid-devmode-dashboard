@@ -135,6 +135,7 @@ export default function Home() {
       setSuperfluidSdk(sf);
       setAccount(wallet.address.toLowerCase());
       setProvider(provider);
+      setSearchFilter({ type: "", token: "", searchInput: "" });
       message.success("Account connected");
     } catch (err) {
       console.error("Error connecting account:", err);
@@ -574,6 +575,7 @@ export default function Home() {
                   <Select
                     defaultValue=""
                     style={{ width: 120 }}
+                    value={searchFilter?.token || ""}
                     onChange={(val) =>
                       setSearchFilter({ ...searchFilter, token: val })
                     }
@@ -590,6 +592,7 @@ export default function Home() {
                   <Select
                     defaultValue=""
                     style={{ width: 120 }}
+                    value={searchFilter?.type || ""}
                     onChange={(val) =>
                       setSearchFilter({ ...searchFilter, type: val })
                     }
@@ -607,7 +610,7 @@ export default function Home() {
                   </Select>
                   <Input.Search
                     placeholder="Search by address"
-                    value={searchFilter?.searchInput}
+                    value={searchFilter?.searchInput || ""}
                     enterButton
                     allowClear
                     loading={loading}
