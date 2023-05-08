@@ -6,6 +6,14 @@
 
 The Superfluid Developer-Mode Dashboard is a fullstack application that allows developers to create, update, and delete streams on their local Superfluid instance. The dashboard is designed to be easy to use and can be quickly set up to connect to your local blockchain where Superfluid is deployed. The dashboard provides a centralized location for users to manage all of their streams, view important details, and perform actions on them.
 
+#### Dashboard
+
+![sdd-dashboard-sc](https://user-images.githubusercontent.com/29351207/236808133-d919b1b9-9ed2-440a-94e6-7140e4e10ebb.png)
+
+#### Search
+
+![sdd-filter-sc](https://user-images.githubusercontent.com/29351207/236808139-bb7f1ec0-6ab4-4d13-8e47-8b72685d704c.png)
+
 ### Features
 
 The Developer-Mode Dashboard for Superfluid comes with the following features:
