@@ -1,6 +1,7 @@
 version: '3'
 services:
   graph-node:
+    container_name: graph-node
     image: graphprotocol/graph-node:latest
     # restart: always
     ports:
@@ -20,16 +21,18 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'mainnet:http://host.docker.internal:8545'
-      GRAPH_LOG: info
+      ethereum: 'localhost:http://host.docker.internal:8545'
+      GRAPH_LOG: trace
   ipfs:
-    image: ipfs/go-ipfs:v0.10.0
+    container_name: ipfs
+    image: ipfs/go-ipfs
     # restart: always
     ports:
       - '5001:5001'
     volumes:
-      - ./.data/ipfs:/data/ipfs
+      - ./data/ipfs:/data/ipfs
   postgres:
+    container_name: postgres
     image: postgres
     # restart: always
     ports:
@@ -41,4 +44,4 @@ services:
       POSTGRES_DB: graph-node
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
     volumes:
-      - ./.data/postgres:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data

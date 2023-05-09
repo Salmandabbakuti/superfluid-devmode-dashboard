@@ -8,7 +8,7 @@ dataSources:
     name: CFAV1
     network: localhost
     source:
-      address: "0xED179b78D5781f93eb169730D8ad1bE7313123F4"
+      address: "{{cfa}}"
       abi: CFAV1
       startBlock: 1
     mapping:

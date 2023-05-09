@@ -4,7 +4,9 @@ import { GraphQLClient, gql } from "graphql-request";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Framework } from "@superfluid-finance/sdk-core";
-import { providers, ethers } from "ethers";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { Wallet } from "@ethersproject/wallet";
+import { parseEther, formatEther } from "@ethersproject/units";
 import {
   Avatar,
   Button,
@@ -24,8 +26,10 @@ import {
   EditOutlined,
   DeleteOutlined
 } from "@ant-design/icons";
+import styles from "./page.module.css";
 
-import addresses from "./addresses.json";
+import addresses from "../config/contractAddresses.json";
+import accounts from "../config/accounts.json";
 
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
@@ -62,15 +66,14 @@ const tokens = [
 const calculateFlowRateInTokenPerMonth = (amount) => {
   if (isNaN(amount)) return 0;
   // convert from wei/sec to token/month for displaying in UI
-  const flowRate = (ethers.utils.formatEther(amount) * 2592000).toFixed(9);
+  const flowRate = (formatEther(amount) * 2592000).toFixed(9);
   // if flowRate is floating point number, remove unncessary trailing zeros
   return flowRate.replace(/\.?0+$/, "");
 };
 
 const calculateFlowRateInWeiPerSecond = (amount) => {
   // convert amount from token/month to wei/second for sending to superfluid
-  const flowRateInWeiPerSecond = ethers.utils
-    .parseEther(amount.toString())
+  const flowRateInWeiPerSecond = parseEther(amount.toString())
     .div(2592000)
     .toString();
   return flowRateInWeiPerSecond;
@@ -105,81 +108,38 @@ const STREAMS_QUERY = gql`
 
 export default function Home() {
   const [account, setAccount] = useState(null);
+  const [accountIndex, setAccountIndex] = useState(0);
   const [provider, setProvider] = useState(null);
-  const [chainId, setChainId] = useState(null);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
   const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
   const [loading, setLoading] = useState(false);
   const [superfluidSdk, setSuperfluidSdk] = useState(null);
-  const [paginationOptions, setPaginationOptions] = useState({
-    first: 100,
-    skip: 0
-  });
   const [searchFilter, setSearchFilter] = useState({
     type: "",
     token: "",
     searchInput: ""
   });
 
-  const handleConnectWallet = async () => {
-    if (window?.ethereum) {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts"
-      });
-      console.log("Using account: ", accounts[0]);
-      const provider = new providers.Web3Provider(window.ethereum);
-      const { chainId } = await provider.getNetwork();
-      console.log("chainId:", chainId);
-      // switch to local ganache network
-      if (chainId !== 31337) {
-        message.info("Switching to local hardhat network");
-        // switch to the aurora testnet
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x7A69" }]
-        }).catch(async (err) => {
-          // This error code indicates that the chain has not been added to MetaMask.
-          console.log("err on switch", err);
-          if (err.code === 4902) {
-            message.info("Adding local hardhat network to metamask");
-            // add the aurora testnet
-            await window.ethereum.request({
-              method: "wallet_addEthereumChain",
-              params: [
-                {
-                  chainId: "0x7A69",
-                  chainName: "Local Network",
-                  nativeCurrency: {
-                    name: "Ether",
-                    symbol: "ETH",
-                    decimals: 18
-                  },
-                  rpcUrls: ["http://localhost:8545"],
-                  blockExplorerUrls: ["http://localhost:8545"]
-                }
-              ]
-            }).then(() => console.log("Added local hardhat network to metamask"))
-              .catch((err) => {
-                message.error("Failed to add local hardhat network to metamask");
-                console.error(err);
-              });
-          }
-        });
-      };
+  const handleConnectAccount = async () => {
+    try {
+      const selectedAccount = accounts[accountIndex];
+      const provider = new JsonRpcProvider("http://localhost:8545");
+      const wallet = new Wallet(selectedAccount.privateKey, provider);
       const sf = await Framework.create({
-        chainId,
+        chainId: 31337,
         provider,
         resolverAddress: addresses.resolver,
         protocolReleaseVersion: "test"
       });
       setSuperfluidSdk(sf);
+      setAccount(wallet.address.toLowerCase());
       setProvider(provider);
-      setChainId(chainId);
-      setAccount(accounts[0]);
-    } else {
-      console.warn("Please use web3 enabled browser");
-      message.warn("Please install Metamask or any other web3 enabled browser");
+      setSearchFilter({ type: "", token: "", searchInput: "" });
+      message.success("Account connected");
+    } catch (err) {
+      console.error("Error connecting account:", err);
+      message.error("Error connecting account");
     }
   };
 
@@ -190,7 +150,6 @@ export default function Home() {
     flowRate
   }) => {
     console.log("create inputs: ", token, sender, receiver, flowRate);
-    console.log("cfav1", superfluidSdk.cfaV1);
     if (!token || !sender || !receiver || !flowRate)
       return message.error("Please fill all the fields");
     try {
@@ -263,34 +222,17 @@ export default function Home() {
 
   useEffect(() => {
     if (provider) {
-      console.log("window.ethereum", window.ethereum);
-      window.ethereum.on("accountsChanged", () => window.location.reload());
-      window.ethereum.on("chainChanged", (chainId) =>
-        setChainId(parseInt(chainId))
-      );
-      window.ethereum.on("connect", (info) =>
-        console.log("connected to network", info)
-      );
-
       getStreams();
-
       // sync streams every 30 seconds
       const intervalCall = setInterval(() => {
         getStreams();
       }, 30000);
-
       return () => {
         clearInterval(intervalCall);
         window.ethereum.removeAllListeners();
       };
     }
   }, [provider]);
-
-  // useEffect(() => {
-  //   getStreams();
-  // },
-  //   [paginationOptions]
-  // );
 
   const getStreams = () => {
     setLoading(true);
@@ -523,10 +465,53 @@ export default function Home() {
               minHeight: 280
             }}
           >
-            {provider ? (
+            <Space>
+              <label htmlFor="account">Select Account:</label>
+              <Select
+                defaultValue={accounts[0].address}
+                name="account"
+                id="account"
+                value={accounts[accountIndex].address}
+                style={{
+                  borderRadius: 10,
+                  marginBottom: 10
+                }}
+                onChange={(val) => setAccountIndex(val)}
+              >
+                {accounts.map((account, i) => (
+                  <Select.Option value={i} key={i}>
+                    {account.address}
+                  </Select.Option>
+                ))}
+              </Select>
+              <Button
+                type="primary"
+                shape="round"
+                style={{ marginTop: 10 }}
+                onClick={handleConnectAccount}
+              >
+                Connect
+              </Button>
+            </Space>
+            {provider && (
               <div>
                 {/* Create Stream Section Starts */}
-                <Card className="new-post-card-container" title="Send Stream">
+                <Card
+                  bordered
+                  title="Create Stream"
+                  className={styles.cardContainer}
+                  actions={[
+                    <Button
+                      key="create"
+                      type="primary"
+                      shape="round"
+                      style={{ marginTop: 10 }}
+                      onClick={() => handleCreateStream(streamInput)}
+                    >
+                      Send
+                    </Button>
+                  ]}
+                >
                   <Input
                     type="text"
                     placeholder="Receiver Wallet Address"
@@ -540,8 +525,7 @@ export default function Home() {
                     }
                     style={{
                       borderRadius: 10,
-                      marginBottom: 10,
-                      width: "100"
+                      marginBottom: 10
                     }}
                   />
                   <Space>
@@ -582,14 +566,6 @@ export default function Home() {
                       }}
                     />
                   </Space>
-                  <Button
-                    type="primary"
-                    shape="round"
-                    style={{ marginTop: 10 }}
-                    onClick={() => handleCreateStream(streamInput)}
-                  >
-                    Send Stream
-                  </Button>
                 </Card>
                 {/* Create Stream Section Ends */}
                 {/* Streams Table Starts */}
@@ -599,6 +575,7 @@ export default function Home() {
                   <Select
                     defaultValue=""
                     style={{ width: 120 }}
+                    value={searchFilter?.token || ""}
                     onChange={(val) =>
                       setSearchFilter({ ...searchFilter, token: val })
                     }
@@ -615,6 +592,7 @@ export default function Home() {
                   <Select
                     defaultValue=""
                     style={{ width: 120 }}
+                    value={searchFilter?.type || ""}
                     onChange={(val) =>
                       setSearchFilter({ ...searchFilter, type: val })
                     }
@@ -632,7 +610,7 @@ export default function Home() {
                   </Select>
                   <Input.Search
                     placeholder="Search by address"
-                    value={searchFilter?.searchInput}
+                    value={searchFilter?.searchInput || ""}
                     enterButton
                     allowClear
                     loading={loading}
@@ -661,24 +639,11 @@ export default function Home() {
                     showQuickJumper: true,
                     defaultCurrent: 1,
                     defaultPageSize: 10,
-                    // total: 200,
                     size: "small"
                   }}
-                // onChange={({ current, pageSize }) => {
-                //   setPaginationOptions({ ...paginationOptions, first: pageSize, skip: (current - 1) * pageSize });
-                // }}
                 />
                 {/* Streams Table Ends */}
               </div>
-            ) : (
-              <Button
-                style={{ marginLeft: "30%" }}
-                type="primary"
-                shape="round"
-                onClick={handleConnectWallet}
-              >
-                Connect Wallet
-              </Button>
             )}
           </Content>
           <Footer style={{ textAlign: "center" }}>

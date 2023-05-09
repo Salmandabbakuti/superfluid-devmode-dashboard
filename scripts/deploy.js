@@ -5,6 +5,7 @@ const TestToken = require("@superfluid-finance/ethereum-contracts/build/contract
 const fs = require("fs");
 
 async function main() {
+  console.log("[INFO]: Deploying Superfluid Framework and SuperTokens on local network");
   const [owner, account1, account2] = await ethers.getSigners();
   const { frameworkDeployer, superTokenDeployer } = await deployTestFramework();
   const contractsFramework = await frameworkDeployer.getFramework();
@@ -124,17 +125,12 @@ async function main() {
     host: contractsFramework.host,
     cfa: contractsFramework.cfa,
     resolver: contractsFramework.resolver,
-    cfav1: contractsFramework.cfaV1Forwarder
+    cfav1Forwarder: contractsFramework.cfaV1Forwarder
   };
-  fs.writeFileSync("./client/app/addresses.json", JSON.stringify(addresses, null, 2));
+  fs.writeFileSync("./client/config/contractAddresses.json", JSON.stringify(addresses, null, 2));
 
   console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fTUSDx]");
 }
 
 main()
-  .then((res) => {
-    console.log("done");
-  })
-  .catch((error) => {
-    console.error(error);
-  });
+  .catch((error) => console.log("Something went wrong while deploying framework:", error));
