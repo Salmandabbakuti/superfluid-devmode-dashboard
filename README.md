@@ -102,6 +102,10 @@ npm run dev
 
 That's it! You are now ready to use the Developer-Mode Dashboard for Superfluid on your local blockchain.
 
+### Demo
+
+https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/f6c92867-b720-4a0e-83b3-94680530004d
+
 ## Credits & Resources:
 
 - [Superfluid Wavepool ideas](https://superfluidhq.notion.site/Superfluid-Wave-Project-Ideas-7e8c792758004bd2ae452d1f9810cc58)
