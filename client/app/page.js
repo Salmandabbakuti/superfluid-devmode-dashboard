@@ -120,6 +120,11 @@ export default function Home() {
     token: "",
     searchInput: ""
   });
+  const [balances, setBalances] = useState({
+    daix: 0,
+    fusdcx: 0,
+    ftusdx: 0
+  });
 
   const handleConnectAccount = async () => {
     try {
@@ -132,6 +137,28 @@ export default function Home() {
         resolverAddress: addresses.resolver,
         protocolReleaseVersion: "test"
       });
+      // get balances of all tokens
+      const daix = await sf.loadSuperToken("fDAIx");
+      const fusdcx = await sf.loadSuperToken("fUSDCx");
+      const ftusdx = await sf.loadSuperToken("fTUSDx");
+      const fdaixBalance = await daix.balanceOf({
+        account: wallet.address,
+        providerOrSigner: provider
+      });
+      const fusdcxBalance = await fusdcx.balanceOf({
+        account: wallet.address,
+        providerOrSigner: provider
+      });
+      const ftusdxBalance = await ftusdx.balanceOf({
+        account: wallet.address,
+        providerOrSigner: provider
+      });
+      setBalances({
+        fdaix: formatEther(fdaixBalance),
+        fusdcx: formatEther(fusdcxBalance),
+        ftusdx: formatEther(ftusdxBalance)
+      });
+      console.log("balances: ", balances);
       setSuperfluidSdk(sf);
       setAccount(wallet.address.toLowerCase());
       setProvider(provider);
@@ -427,25 +454,46 @@ export default function Home() {
       <Layout style={{ minHeight: "100vh" }}>
         <Sider theme="dark" breakpoint="lg" collapsedWidth="0">
           {account && (
-            <Card type="inner" size="small">
+            <Card
+              type="inner"
+              size="small"
+              title={
+                <Card.Meta
+                  title={
+                    <Button
+                      type="primary"
+                      shape="round"
+                      onClick={() => window.location.reload()}
+                    >
+                      Disconnect
+                    </Button>
+                  }
+                  description={`${account.slice(0, 8)}...${account.slice(-8)}`}
+                  avatar={
+                    <Avatar
+                      shape="circle"
+                      size="large"
+                      alt="Profile"
+                      src={`https://api.dicebear.com/5.x/open-peeps/svg?seed=${account}`}
+                    />
+                  }
+                />
+              }
+            >
               <Card.Meta
-                title={
-                  <Button
-                    type="primary"
-                    shape="round"
-                    onClick={() => window.location.reload()}
-                  >
-                    Disconnect
-                  </Button>
-                }
-                description={`${account.slice(0, 8)}...${account.slice(-8)}`}
-                avatar={
-                  <Avatar
-                    shape="circle"
-                    size="large"
-                    alt="Profile"
-                    src={`https://api.dicebear.com/5.x/open-peeps/svg?seed=${account}`}
-                  />
+                title="Balances"
+                description={
+                  <Space direction="vertical">
+                    {tokens.map((token) => (
+                      <span key={token.address}>
+                        <Avatar shape="circle" size="small" src={token.icon} />
+                        <span style={{ marginLeft: 10 }}>{token.symbol}</span>
+                        <span style={{ marginLeft: 10 }}>
+                          {balances[token.name.toLowerCase()] || 0}
+                        </span>
+                      </span>
+                    ))}
+                  </Space>
                 }
               />
             </Card>

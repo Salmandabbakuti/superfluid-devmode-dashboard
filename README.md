@@ -98,7 +98,7 @@ npm install
 npm run dev
 ```
 
-3. Navigate to http://localhost:3000/ and choose a network to use from dropdown and connect. Now, You can create, update, and delete, view, query, search streams on your local Superfluid instance with ease.
+3. Navigate to http://localhost:3000/ and choose an account to use from dropdown and connect. Now, You can create, update, and delete, view, query, search streams on your local Superfluid instance with ease.
 
 That's it! You are now ready to use the Developer-Mode Dashboard for Superfluid on your local blockchain.
 

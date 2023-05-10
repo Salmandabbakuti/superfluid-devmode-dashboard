@@ -20,32 +20,34 @@ async function main() {
   });
 
   // deploy wrapper tokens dai,usdc,usdt and store addresses in local file
-  console.log("[INFO]: Deploying wrapper tokens [fDAIx, fUSDCx, fUSDTx]");
+  console.log("[INFO]: Deploying wrapper token contracts [fDAIx, fUSDCx, fTUSDx]");
 
+  const millionEther = ethers.utils.parseEther("1000000").toString();
+  // deploying 1 million test DAI, USDC, TUSD tokens and wrapping them
   await superTokenDeployer.deployWrapperSuperToken(
     "Fake DAI Token",
     "fDAI",
     18,
-    ethers.utils.parseEther("100000000").toString()
+    millionEther
   );
 
   await superTokenDeployer.deployWrapperSuperToken(
     "Fake USDC Token",
     "fUSDC",
     18,
-    ethers.utils.parseEther("100000000").toString()
+    millionEther
   );
 
   await superTokenDeployer.deployWrapperSuperToken(
     "Fake TUSD Token",
     "fTUSD",
     18,
-    ethers.utils.parseEther("100000000").toString()
+    millionEther
   );
 
-  const thousandEther = ethers.utils.parseEther("10000");
+  const thousandEther = ethers.utils.parseEther("1000");
 
-  console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fTUSDx] to all accounts");
+  console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fTUSDx] to first 3 accounts");
   // load wrapper tokens and mint to all accounts
   const fdaix = await sf.loadSuperToken("fDAIx");
   const fdai = new ethers.Contract(fdaix.underlyingToken.address, TestToken.abi, owner);

@@ -72,13 +72,18 @@ export function getOrInitStreamRevision(
 }
 
 export function handleFlowUpdated(event: FlowUpdatedEvent): void {
+
+  const sender = event.params.sender;
+  const receiver = event.params.receiver;
+  const token = event.params.token;
+
   // Create a streamRevision entity for this stream if one doesn't exist.
   const streamRevision = getOrInitStreamRevision(
-    event.params.sender,
-    event.params.receiver,
-    event.params.token
+    sender,
+    receiver,
+    token
   );
-  const streamId = getStreamID(event.params.sender, event.params.receiver, event.params.token, streamRevision.revisionIndex);
+  const streamId = getStreamID(sender, receiver, token, streamRevision.revisionIndex);
   // set stream id
   streamRevision.mostRecentStream = streamId;
   streamRevision.save();
@@ -88,13 +93,13 @@ export function handleFlowUpdated(event: FlowUpdatedEvent): void {
 
   if (stream == null) {
     stream = new Stream(streamId);
-    stream.sender = event.params.sender.toHex();
-    stream.receiver = event.params.receiver.toHex();
-    stream.token = event.params.token.toHex();
+    stream.sender = sender.toHex();
+    stream.receiver = receiver.toHex();
+    stream.token = token.toHex();
     stream.createdAt = currentTimestamp;
     stream.txHash = event.transaction.hash.toHex();
   }
-  stream.updatedAt = currentTimestamp;
   stream.flowRate = event.params.flowRate;
+  stream.updatedAt = currentTimestamp;
   stream.save();
 }
