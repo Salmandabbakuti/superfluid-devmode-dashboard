@@ -110,6 +110,7 @@ export default function Home() {
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
   const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
   const [superfluidSdk, setSuperfluidSdk] = useState(null);
   const [searchFilter, setSearchFilter] = useState({
     type: "",
@@ -124,6 +125,7 @@ export default function Home() {
 
   const handleConnectAccount = async () => {
     try {
+      setLoading(true);
       const selectedAccount = accounts[accountIndex];
       const wallet = new Wallet(selectedAccount.privateKey, provider);
       const sf = await Framework.create({
@@ -157,8 +159,10 @@ export default function Home() {
       setSuperfluidSdk(sf);
       setAccount(wallet.address.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
+      setLoading(false);
       message.success("Account connected");
     } catch (err) {
+      setLoading(false);
       console.error("Error connecting account:", err);
       message.error("Error connecting account");
     }
@@ -256,7 +260,7 @@ export default function Home() {
   }, [account]);
 
   const getStreams = () => {
-    setLoading(true);
+    setDataLoading(true);
     // update search filters based on type
     const { type, token, searchInput } = searchFilter;
     const filterObj = {};
@@ -293,10 +297,10 @@ export default function Home() {
       .then((data) => {
         console.log("streams: ", data.streams);
         setStreams(data.streams);
-        setLoading(false);
+        setDataLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
+        setDataLoading(false);
         message.error("Something went wrong!");
         console.error("failed to get streams: ", err);
       });
@@ -523,6 +527,8 @@ export default function Home() {
                 type="primary"
                 shape="round"
                 style={{ marginTop: 10 }}
+                loading={loading}
+                disabled={loading}
                 onClick={handleConnectAccount}
               >
                 Connect
@@ -541,6 +547,8 @@ export default function Home() {
                       type="primary"
                       shape="round"
                       style={{ marginTop: 10 }}
+                      disabled={loading}
+                      loading={loading}
                       onClick={() => handleCreateStream(streamInput)}
                     >
                       Send
@@ -652,7 +660,6 @@ export default function Home() {
                     value={searchFilter?.searchInput || ""}
                     enterButton
                     allowClear
-                    loading={loading}
                     onSearch={getStreams}
                     onChange={(e) =>
                       setSearchFilter({
@@ -661,7 +668,10 @@ export default function Home() {
                       })
                     }
                   />
-                  <Button type="primary" onClick={getStreams}>
+                  <Button
+                    type="primary"
+                    onClick={getStreams}
+                  >
                     <SyncOutlined />
                   </Button>
                 </Space>
@@ -671,7 +681,7 @@ export default function Home() {
                   rowKey="id"
                   dataSource={streams}
                   scroll={{ x: 970 }}
-                  loading={loading}
+                  loading={dataLoading}
                   pagination={{
                     pageSizeOptions: [5, 10, 20, 25, 50, 100],
                     showSizeChanger: true,

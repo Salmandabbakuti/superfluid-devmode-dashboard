@@ -110,7 +110,7 @@ https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/
 
 1. If you encounter any issues deploying the Superfluid contracts, make sure you have a local blockchain running on port `8545` and that you have started a Hardhat node using `npx hardhat node`. Check Hardhat errors and try running npx hardhat clean and then `npx hardhat node` again. Rerun the deploy script: `npx hardhat run scripts/deploy.js --network localhost`.
 
-2. If you encounter any issues deploying the Superfluid subgraph, make sure you have started the local docker containers using `docker-compose up -d`. Also, make sure you have generated the subgraph code using `npm run codegen`. Check Docker container logs for errors: `docker logs <container-name>`. If you are still having issues, kill the docker containers using `docker-compose down` and try again.
+2. If you encounter any issues deploying the Superfluid subgraph, make sure you have started the local docker containers using `docker-compose up -d`. Wait for a few seconds to ensure that the containers have started completely before running next commands. This will give them enough time to initialize and set up the required services. Make sure you have generated the subgraph code using `npm run codegen`. Check Docker container logs for errors: `docker logs <container-name>`. If you are still having issues, kill the docker containers using `docker-compose down` and try again.
 
 ## Credits & Resources:
 
