@@ -5,7 +5,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Framework } from "@superfluid-finance/sdk-core";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { Wallet } from "@ethersproject/wallet";
 import { parseEther, formatEther } from "@ethersproject/units";
 import {
   Avatar,
@@ -25,7 +24,8 @@ import { SyncOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./page.module.css";
 
 import addresses from "../config/contractAddresses.json";
-import accounts from "../config/accounts.json";
+
+const provider = new JsonRpcProvider("http://localhost:8545");
 
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
@@ -102,13 +102,14 @@ const STREAMS_QUERY = gql`
 `;
 
 export default function Home() {
+  const [accounts, setAccounts] = useState([]);
   const [account, setAccount] = useState(null);
   const [accountIndex, setAccountIndex] = useState(0);
-  const [provider, setProvider] = useState(null);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
   const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
   const [superfluidSdk, setSuperfluidSdk] = useState(null);
   const [searchFilter, setSearchFilter] = useState({
     type: "",
@@ -121,11 +122,21 @@ export default function Home() {
     ftusdx: 0
   });
 
+  //  getting list of accounts from provider
+  useEffect(() => {
+    provider.listAccounts().then((accounts) => {
+      console.log("accounts: ", accounts);
+      setAccounts(accounts);
+    }).catch(err => {
+      message.error("Failed to get list of accounts");
+      console.log("error getting provider accounts: ", err);
+    });
+  }, []);
+
   const handleConnectAccount = async () => {
     try {
+      setLoading(true);
       const selectedAccount = accounts[accountIndex];
-      const provider = new JsonRpcProvider("http://localhost:8545");
-      const wallet = new Wallet(selectedAccount.privateKey, provider);
       const sf = await Framework.create({
         chainId: 31337,
         provider,
@@ -137,15 +148,15 @@ export default function Home() {
       const fusdcx = await sf.loadSuperToken("fUSDCx");
       const ftusdx = await sf.loadSuperToken("fTUSDx");
       const fdaixBalance = await daix.balanceOf({
-        account: wallet.address,
+        account: selectedAccount,
         providerOrSigner: provider
       });
       const fusdcxBalance = await fusdcx.balanceOf({
-        account: wallet.address,
+        account: selectedAccount,
         providerOrSigner: provider
       });
       const ftusdxBalance = await ftusdx.balanceOf({
-        account: wallet.address,
+        account: selectedAccount,
         providerOrSigner: provider
       });
       setBalances({
@@ -155,11 +166,12 @@ export default function Home() {
       });
       console.log("balances: ", balances);
       setSuperfluidSdk(sf);
-      setAccount(wallet.address.toLowerCase());
-      setProvider(provider);
+      setAccount(selectedAccount.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
+      setLoading(false);
       message.success("Account connected");
     } catch (err) {
+      setLoading(false);
       console.error("Error connecting account:", err);
       message.error("Error connecting account");
     }
@@ -184,8 +196,7 @@ export default function Home() {
         receiver,
         flowRate: flowRateInWeiPerSecond
       });
-
-      await flowOp.exec(provider.getSigner());
+      await flowOp.exec(provider.getSigner(accountIndex));
       message.success("Stream created successfully");
       setLoading(false);
     } catch (err) {
@@ -213,7 +224,7 @@ export default function Home() {
         receiver,
         flowRate: flowRateInWeiPerSecond
       });
-      await flowOp.exec(provider.getSigner());
+      await flowOp.exec(provider.getSigner(accountIndex));
       message.success("Stream updated successfully");
       setLoading(false);
     } catch (err) {
@@ -232,7 +243,7 @@ export default function Home() {
         receiver
       });
 
-      await flowOp.exec(provider.getSigner());
+      await flowOp.exec(provider.getSigner(accountIndex));
       message.success("Stream deleted successfully");
       setLoading(false);
     } catch (err) {
@@ -243,7 +254,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (provider) {
+    if (account) {
       getStreams();
       // sync streams every 30 seconds
       const intervalCall = setInterval(() => {
@@ -254,10 +265,10 @@ export default function Home() {
         window.ethereum.removeAllListeners();
       };
     }
-  }, [provider]);
+  }, [account]);
 
   const getStreams = () => {
-    setLoading(true);
+    setDataLoading(true);
     // update search filters based on type
     const { type, token, searchInput } = searchFilter;
     const filterObj = {};
@@ -294,10 +305,10 @@ export default function Home() {
       .then((data) => {
         console.log("streams: ", data.streams);
         setStreams(data.streams);
-        setLoading(false);
+        setDataLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
+        setDataLoading(false);
         message.error("Something went wrong!");
         console.error("failed to get streams: ", err);
       });
@@ -504,10 +515,10 @@ export default function Home() {
             <Space>
               <label htmlFor="account">Select Account:</label>
               <Select
-                defaultValue={accounts[0].address}
+                defaultValue={0}
                 name="account"
                 id="account"
-                value={accounts[accountIndex].address}
+                value={accountIndex}
                 style={{
                   borderRadius: 10,
                   marginBottom: 10
@@ -516,7 +527,7 @@ export default function Home() {
               >
                 {accounts.map((account, i) => (
                   <Select.Option value={i} key={i}>
-                    {account.address}
+                    {account}
                   </Select.Option>
                 ))}
               </Select>
@@ -524,12 +535,14 @@ export default function Home() {
                 type="primary"
                 shape="round"
                 style={{ marginTop: 10 }}
+                loading={loading}
+                disabled={loading}
                 onClick={handleConnectAccount}
               >
                 Connect
               </Button>
             </Space>
-            {provider && (
+            {account && (
               <div>
                 {/* Create Stream Section Starts */}
                 <Card
@@ -542,6 +555,8 @@ export default function Home() {
                       type="primary"
                       shape="round"
                       style={{ marginTop: 10 }}
+                      disabled={loading}
+                      loading={loading}
                       onClick={() => handleCreateStream(streamInput)}
                     >
                       Send
@@ -653,7 +668,6 @@ export default function Home() {
                     value={searchFilter?.searchInput || ""}
                     enterButton
                     allowClear
-                    loading={loading}
                     onSearch={getStreams}
                     onChange={(e) =>
                       setSearchFilter({
@@ -662,7 +676,10 @@ export default function Home() {
                       })
                     }
                   />
-                  <Button type="primary" onClick={getStreams}>
+                  <Button
+                    type="primary"
+                    onClick={getStreams}
+                  >
                     <SyncOutlined />
                   </Button>
                 </Space>
@@ -672,7 +689,7 @@ export default function Home() {
                   rowKey="id"
                   dataSource={streams}
                   scroll={{ x: 970 }}
-                  loading={loading}
+                  loading={dataLoading}
                   pagination={{
                     pageSizeOptions: [5, 10, 20, 25, 50, 100],
                     showSizeChanger: true,
