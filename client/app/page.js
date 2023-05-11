@@ -21,11 +21,7 @@ import {
   Popconfirm,
   InputNumber
 } from "antd";
-import {
-  SyncOutlined,
-  EditOutlined,
-  DeleteOutlined
-} from "@ant-design/icons";
+import { SyncOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import styles from "./page.module.css";
 
 import addresses from "../config/contractAddresses.json";
@@ -78,7 +74,6 @@ const calculateFlowRateInWeiPerSecond = (amount) => {
     .toString();
   return flowRateInWeiPerSecond;
 };
-
 
 const STREAMS_QUERY = gql`
   query getStreams(
@@ -324,7 +319,7 @@ export default function Home() {
           <>
             <Avatar shape="circle" size="large" src={tokenData.icon} />
             <a
-              href={`https://goerli.etherscan.io/token/${token}`}
+              href={`http://localhost:8545/token/${token}`}
               target="_blank"
               rel="noreferrer"
               style={{ marginLeft: 10 }}
@@ -342,7 +337,7 @@ export default function Home() {
       width: "10%",
       render: ({ sender }) => (
         <a
-          href={`https://goerli.etherscan.io/address/${sender}`}
+          href={`http://localhost:8545/address/${sender}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -357,7 +352,7 @@ export default function Home() {
       width: "10%",
       render: ({ receiver }) => (
         <a
-          href={`https://goerli.etherscan.io/address/${receiver}`}
+          href={`http://localhost:8545/address/${receiver}`}
           target="_blank"
           rel="noreferrer"
         >
@@ -400,48 +395,41 @@ export default function Home() {
       width: "5%",
       render: (row) => (
         <>
-          {row.sender === account ? (
-            <>
-              {row.flowRate === "0" ? (
-                <Space>
-                  <Tag color="blue">OUTGOING</Tag>
-                  <Tag color="red">TERMINATED</Tag>
-                </Space>
-              ) : (
-                <Space size="small">
-                  <Popconfirm
-                    title={
-                      <InputNumber
-                        addonAfter="/month"
-                        placeholder="New Flow Rate"
-                        onChange={(val) => setUpdatedFlowRate(val)}
-                      />
-                    }
-                    // add descrition as input number to update flow rate
-                    description="Enter new flow rate"
-                    onConfirm={() =>
-                      handleUpdateStream({ ...row, flowRate: updatedFlowRate })
-                    }
-                  >
-                    <Button type="primary" shape="circle">
-                      <EditOutlined />
-                    </Button>
-                  </Popconfirm>
-                  <Popconfirm
-                    title="Are you sure to delete?"
-                    onConfirm={() => handleDeleteStream(row)}
-                  >
-                    <Button type="primary" shape="circle" danger>
-                      <DeleteOutlined />
-                    </Button>
-                  </Popconfirm>
-                </Space>
-              )}
-            </>
+          {row.sender === account && row.flowRate !== "0" ? (
+            <Space size="small">
+              <Popconfirm
+                title={
+                  <InputNumber
+                    addonAfter="/month"
+                    placeholder="New Flow Rate"
+                    onChange={(val) => setUpdatedFlowRate(val)}
+                  />
+                }
+                // add descrition as input number to update flow rate
+                description="Enter new flow rate"
+                onConfirm={() =>
+                  handleUpdateStream({ ...row, flowRate: updatedFlowRate })
+                }
+              >
+                <Button type="primary" shape="circle">
+                  <EditOutlined />
+                </Button>
+              </Popconfirm>
+              <Popconfirm
+                title="Are you sure to delete?"
+                onConfirm={() => handleDeleteStream(row)}
+              >
+                <Button type="primary" shape="circle" danger>
+                  <DeleteOutlined />
+                </Button>
+              </Popconfirm>
+            </Space>
           ) : (
             <Space>
-              <Tag color="green">INCOMING</Tag>
-              {row.status === "TERMINATED" && <Tag color="red">TERMINATED</Tag>}
+              <Tag color={row.sender === account ? "blue" : "green"}>
+                {row.sender === account ? "OUTGOING" : "INCOMING"}
+              </Tag>
+              {row.flowRate === "0" && <Tag color="red">TERMINATED</Tag>}
             </Space>
           )}
         </>
@@ -593,7 +581,11 @@ export default function Home() {
                     >
                       {tokens.map((token, i) => (
                         <Select.Option value={token.address} key={i}>
-                          <Avatar shape="circle" size="small" src={token.icon} />{" "}
+                          <Avatar
+                            shape="circle"
+                            size="small"
+                            src={token.icon}
+                          />{" "}
                           {token.symbol}
                         </Select.Option>
                       ))}
