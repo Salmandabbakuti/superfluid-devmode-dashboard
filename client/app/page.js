@@ -27,6 +27,8 @@ import styles from "./page.module.css";
 import addresses from "../config/contractAddresses.json";
 import accounts from "../config/accounts.json";
 
+const provider = new JsonRpcProvider("http://localhost:8545");
+
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
 
@@ -104,7 +106,6 @@ const STREAMS_QUERY = gql`
 export default function Home() {
   const [account, setAccount] = useState(null);
   const [accountIndex, setAccountIndex] = useState(0);
-  const [provider, setProvider] = useState(null);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
   const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
@@ -124,7 +125,6 @@ export default function Home() {
   const handleConnectAccount = async () => {
     try {
       const selectedAccount = accounts[accountIndex];
-      const provider = new JsonRpcProvider("http://localhost:8545");
       const wallet = new Wallet(selectedAccount.privateKey, provider);
       const sf = await Framework.create({
         chainId: 31337,
@@ -156,7 +156,6 @@ export default function Home() {
       console.log("balances: ", balances);
       setSuperfluidSdk(sf);
       setAccount(wallet.address.toLowerCase());
-      setProvider(provider);
       setSearchFilter({ type: "", token: "", searchInput: "" });
       message.success("Account connected");
     } catch (err) {
@@ -243,7 +242,7 @@ export default function Home() {
   };
 
   useEffect(() => {
-    if (provider) {
+    if (account) {
       getStreams();
       // sync streams every 30 seconds
       const intervalCall = setInterval(() => {
@@ -254,7 +253,7 @@ export default function Home() {
         window.ethereum.removeAllListeners();
       };
     }
-  }, [provider]);
+  }, [account]);
 
   const getStreams = () => {
     setLoading(true);
@@ -529,7 +528,7 @@ export default function Home() {
                 Connect
               </Button>
             </Space>
-            {provider && (
+            {account && (
               <div>
                 {/* Create Stream Section Starts */}
                 <Card

@@ -106,6 +106,12 @@ That's it! You are now ready to use the Developer-Mode Dashboard for Superfluid 
 
 https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/f6c92867-b720-4a0e-83b3-94680530004d
 
+### Troubleshooting
+
+1. If you encounter any issues deploying the Superfluid contracts, make sure you have a local blockchain running on port `8545` and that you have started a Hardhat node using `npx hardhat node`. Check Hardhat errors and try running npx hardhat clean and then `npx hardhat node` again. Rerun the deploy script: `npx hardhat run scripts/deploy.js --network localhost`.
+
+2. If you encounter any issues deploying the Superfluid subgraph, make sure you have started the local docker containers using `docker-compose up -d`. Also, make sure you have generated the subgraph code using `npm run codegen`. Check Docker container logs for errors: `docker logs <container-name>`. If you are still having issues, kill the docker containers using `docker-compose down` and try again.
+
 ## Credits & Resources:
 
 - [Superfluid Wavepool ideas](https://superfluidhq.notion.site/Superfluid-Wave-Project-Ideas-7e8c792758004bd2ae452d1f9810cc58)
