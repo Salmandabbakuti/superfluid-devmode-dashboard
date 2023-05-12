@@ -37,7 +37,7 @@ jobs:
         run: |
           docker-compose up -d
           echo "Waiting for containers to warmup..."
-          sleep 30
+          sleep 40
           npm run codegen
           npm run create-local
           npm run deploy-local
