@@ -13,7 +13,7 @@
     "@ant-design/icons": "4.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.7.0",
-    "@superfluid-finance/sdk-core": "^0.6.1",
+    "@superfluid-finance/sdk-core": "0.4.4",
     "antd": "4.23.2",
     "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
