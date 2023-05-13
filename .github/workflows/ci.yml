@@ -7,6 +7,9 @@ name: Deploy Superfluid Framework and Subgraph
 on:
   push:
     branches: [main, develop, init, "feat/*"]
+    paths-ignore:
+      - "README.md"
+      - "client/**"
   pull_request:
     branches: [main, develop, init, "feat/*"]
 
