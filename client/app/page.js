@@ -531,7 +531,8 @@ export default function Home() {
                 value={accountIndex}
                 style={{
                   borderRadius: 10,
-                  marginBottom: 10
+                  marginBottom: 10,
+                  width: 280
                 }}
                 onChange={(val) => setAccountIndex(val)}
               >
