@@ -20,7 +20,12 @@ import {
   Popconfirm,
   InputNumber
 } from "antd";
-import { SyncOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  SyncOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  CopyOutlined
+} from "@ant-design/icons";
 import styles from "./page.module.css";
 
 import addresses from "../config/contractAddresses.json";
@@ -124,13 +129,18 @@ export default function Home() {
 
   //  getting list of accounts from provider
   useEffect(() => {
-    provider.listAccounts().then((accounts) => {
-      console.log("accounts: ", accounts);
-      setAccounts(accounts);
-    }).catch(err => {
-      message.error("Failed to get list of accounts");
-      console.log("error getting provider accounts: ", err);
-    });
+    provider
+      .listAccounts()
+      .then((accounts) => {
+        console.log("accounts: ", accounts);
+        setAccounts(accounts);
+      })
+      .catch((err) => {
+        message.error(
+          "Failed to get accounts. Please ensure local blockchain node is running on port 8545"
+        );
+        console.log("error getting provider accounts: ", err);
+      });
   }, []);
 
   const handleConnectAccount = async () => {
@@ -164,7 +174,6 @@ export default function Home() {
         fusdcx: formatEther(fusdcxBalance),
         ftusdx: formatEther(ftusdxBalance)
       });
-      console.log("balances: ", balances);
       setSuperfluidSdk(sf);
       setAccount(selectedAccount.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
@@ -518,6 +527,7 @@ export default function Home() {
                 defaultValue={0}
                 name="account"
                 id="account"
+                loading={loading}
                 value={accountIndex}
                 style={{
                   borderRadius: 10,
@@ -527,7 +537,15 @@ export default function Home() {
               >
                 {accounts.map((account, i) => (
                   <Select.Option value={i} key={i}>
-                    {account}
+                    {`Account #${i} - ${account.slice(0, 8)}...${account.slice(-5)}`}
+                    <CopyOutlined
+                      style={{ marginLeft: 10 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(account);
+                        message.success("Address copied to clipboard");
+                      }}
+                    />
                   </Select.Option>
                 ))}
               </Select>
@@ -535,7 +553,6 @@ export default function Home() {
                 type="primary"
                 shape="round"
                 style={{ marginTop: 10 }}
-                loading={loading}
                 disabled={loading}
                 onClick={handleConnectAccount}
               >
@@ -676,10 +693,7 @@ export default function Home() {
                       })
                     }
                   />
-                  <Button
-                    type="primary"
-                    onClick={getStreams}
-                  >
+                  <Button type="primary" onClick={getStreams}>
                     <SyncOutlined />
                   </Button>
                 </Space>
