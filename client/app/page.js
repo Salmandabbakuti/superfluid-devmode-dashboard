@@ -531,16 +531,27 @@ export default function Home() {
                 value={accountIndex}
                 style={{
                   borderRadius: 10,
-                  marginBottom: 10,
-                  width: 280
+                  width: 270
                 }}
                 onChange={(val) => setAccountIndex(val)}
               >
                 {accounts.map((account, i) => (
-                  <Select.Option value={i} key={i}>
+                  <Select.Option
+                    value={i}
+                    key={i}
+                    onMouseEnter={(e) => {
+                      const copyIcon = e.target.querySelector('.copy-icon');
+                      if (copyIcon) copyIcon.style.display = 'inline-block';
+                    }}
+                    onMouseLeave={(e) => {
+                      const copyIcon = e.target.querySelector('.copy-icon');
+                      if (copyIcon) copyIcon.style.display = 'none';
+                    }}
+                  >
                     {`Account #${i} - ${account.slice(0, 8)}...${account.slice(-5)}`}
                     <CopyOutlined
-                      style={{ marginLeft: 10 }}
+                      className="copy-icon"
+                      style={{ marginLeft: 10, fontSize: '17px', display: 'none' }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(account);
@@ -553,7 +564,6 @@ export default function Home() {
               <Button
                 type="primary"
                 shape="round"
-                style={{ marginTop: 10 }}
                 disabled={loading}
                 onClick={handleConnectAccount}
               >
