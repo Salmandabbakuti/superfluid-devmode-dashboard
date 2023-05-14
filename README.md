@@ -16,17 +16,17 @@ The Superfluid Developer-Mode Dashboard is a fullstack application that allows d
 
 ### Features
 
-The Developer-Mode Dashboard for Superfluid comes with the following features:
+The Developer-Mode Dashboard for Superfluid simplifies the process of creating, updating, and deleting, reading streams by eliminating the need to remember wallet/token addresses or type stream IDs. Here's a simplified description of the features:
 
-1. Create new streams: You can create new streams on your local Superfluid instance by specifying the token, recipient, and flow rate. The flow rate is specified in the format "tokens per month," which is more user-friendly than the standard wei per second format used by Ethereum.
+**1. Creating streams:** You can easily create streams by copying the recipient address from a dropdown menu and pasting it. Additionally, you can choose the desired token and specify the flow rate in a user-friendly "tokens per month" format.
 
-2. Update existing streams: You can update existing streams by changing the flow rate.
+**2. Updating streams:** To update a stream, you can simply click the edit button of the desired stream. There's no need to input the stream ID or sender/receiver addresses. Just enter the new flow rate and confirm the update.
 
-3. Delete streams: You can delete streams that are no longer needed.
+**3. Deleting streams:** Deleting a stream is straightforward. By clicking the delete button of a specific stream, you can remove it without the hassle of entering sender/receiver addresses.
 
-4. View stream details: You can view important details about your streams such as the token, recipient, flow rate, stream type, last updated and more.
+**4. View stream details:** You have the ability to access and review essential details about your streams. This includes information such as the token being used, recipient address, flow rate, stream type, last updated timestamp, and more. This comprehensive view allows you to easily track and understand the characteristics of each stream.
 
-5. Filter and search streams: You can filter and search streams by token, recipient, flow rate, stream type, and last updated.
+**5. Filter and search streams:** The dashboard offers a convenient way to filter and search for specific streams based on various criteria. You can apply filters based on the token being used, recipient address, flow rate, stream type. This functionality enables you to quickly locate and manage streams based on specific parameters, enhancing efficiency and streamlining the workflow.
 
 ## Getting Started
 
@@ -85,7 +85,7 @@ npm run deploy-local
 
 Finally, you will need to start the client application. Here are the steps to do this:
 
-> Note: Running the client application is optional. You can use this[deployed frontend directly](https://superfluid-devmode-dashboard.vercel.app). Just ensure that your blockchain is running on port 8545 and that the framework and subgraph are deployed (following the previous steps).
+> Note: Running the client application is optional. You can use this [deployed frontend directly](https://superfluid-devmode-dashboard.vercel.app). Just ensure that your blockchain is running on port 8545 and that the framework and subgraph are deployed (following the previous steps).
 
 1. Navigate to the client directory and install required dependencies:
 
