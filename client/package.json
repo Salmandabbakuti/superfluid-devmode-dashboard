@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "4.7.0",
+    "@ethersproject/contracts": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.7.0",
     "antd": "4.23.2",
