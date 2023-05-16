@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { GraphQLClient, gql } from "graphql-request";
+import { GraphQLClient } from "graphql-request";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { Framework } from "@superfluid-finance/sdk-core";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { parseEther, formatEther } from "@ethersproject/units";
+import { formatEther } from "@ethersproject/units";
+import { Contract } from "@ethersproject/contracts";
+import { Interface } from "@ethersproject/abi";
 import {
   Avatar,
   Button,
@@ -30,6 +31,16 @@ import styles from "./page.module.css";
 
 import addresses from "../config/contractAddresses.json";
 
+import {
+  cfaABI,
+  hostABI,
+  erc20ABI,
+  tokens,
+  calculateFlowRateInTokenPerMonth,
+  calculateFlowRateInWeiPerSecond,
+  STREAMS_QUERY
+} from "../utils";
+
 const provider = new JsonRpcProvider("http://localhost:8545");
 
 const { Header, Footer, Sider, Content } = Layout;
@@ -40,71 +51,29 @@ const client = new GraphQLClient(
   { headers: {} }
 );
 
-const tokens = [
-  {
-    name: "fDAIx",
-    symbol: "fDAIx",
-    address: addresses.fdaix.toLowerCase(),
-    icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/dai/icon.svg"
-  },
-  {
-    name: "fUSDCx",
-    symbol: "fUSDCx",
-    address: addresses.fusdcx.toLowerCase(),
-    icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/usdc/icon.svg"
-  },
-  {
-    name: "fTUSDx",
-    symbol: "fTUSDx",
-    address: addresses.ftusdx.toLowerCase(),
-    icon:
-      "https://raw.githubusercontent.com/superfluid-finance/assets/master/public/tokens/tusd/icon.svg"
-  }
-];
 
-const calculateFlowRateInTokenPerMonth = (amount) => {
-  if (isNaN(amount)) return 0;
-  // convert from wei/sec to token/month for displaying in UI
-  const flowRate = (formatEther(amount) * 2592000).toFixed(9);
-  // if flowRate is floating point number, remove unncessary trailing zeros
-  return flowRate.replace(/\.?0+$/, "");
-};
 
-const calculateFlowRateInWeiPerSecond = (amount) => {
-  // convert amount from token/month to wei/second for sending to superfluid
-  const flowRateInWeiPerSecond = parseEther(amount.toString())
-    .div(2592000)
-    .toString();
-  return flowRateInWeiPerSecond;
-};
 
-const STREAMS_QUERY = gql`
-  query getStreams(
-    $skip: Int
-    $first: Int
-    $orderBy: Stream_orderBy
-    $orderDirection: OrderDirection
-    $where: Stream_filter
-  ) {
-    streams(
-      skip: $skip
-      first: $first
-      orderBy: $orderBy
-      orderDirection: $orderDirection
-      where: $where
-    ) {
-      id
-      sender
-      receiver
-      token
-      flowRate
-      createdAt
-      updatedAt
-    }
-  }
-`;
+const cfaInterface = new Interface(cfaABI);
+
+const hostContract = new Contract(addresses.host, hostABI, provider);
+
+// load contracts
+const fdaixContract = new Contract(
+  addresses.fdaix,
+  erc20ABI,
+  provider
+);
+const fusdcxContract = new Contract(
+  addresses.fusdcx,
+  erc20ABI,
+  provider
+);
+const ftusdxContract = new Contract(
+  addresses.ftusdx,
+  erc20ABI,
+  provider
+);
 
 export default function Home() {
   const [accounts, setAccounts] = useState([]);
@@ -115,7 +84,6 @@ export default function Home() {
   const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
-  const [superfluidSdk, setSuperfluidSdk] = useState(null);
   const [searchFilter, setSearchFilter] = useState({
     type: "",
     token: "",
@@ -147,34 +115,15 @@ export default function Home() {
     try {
       setLoading(true);
       const selectedAccount = accounts[accountIndex];
-      const sf = await Framework.create({
-        chainId: 31337,
-        provider,
-        resolverAddress: addresses.resolver,
-        protocolReleaseVersion: "test"
-      });
       // get balances of all tokens
-      const daix = await sf.loadSuperToken("fDAIx");
-      const fusdcx = await sf.loadSuperToken("fUSDCx");
-      const ftusdx = await sf.loadSuperToken("fTUSDx");
-      const fdaixBalance = await daix.balanceOf({
-        account: selectedAccount,
-        providerOrSigner: provider
-      });
-      const fusdcxBalance = await fusdcx.balanceOf({
-        account: selectedAccount,
-        providerOrSigner: provider
-      });
-      const ftusdxBalance = await ftusdx.balanceOf({
-        account: selectedAccount,
-        providerOrSigner: provider
-      });
+      const fdaixBalance = await fdaixContract.balanceOf(selectedAccount);
+      const fusdcxBalance = await fusdcxContract.balanceOf(selectedAccount);
+      const ftusdxBalance = await ftusdxContract.balanceOf(selectedAccount);
       setBalances({
         fdaix: formatEther(fdaixBalance),
         fusdcx: formatEther(fusdcxBalance),
         ftusdx: formatEther(ftusdxBalance)
       });
-      setSuperfluidSdk(sf);
       setAccount(selectedAccount.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
       setLoading(false);
@@ -197,15 +146,17 @@ export default function Home() {
       return message.error("Please fill all the fields");
     try {
       setLoading(true);
-      const superToken = await superfluidSdk.loadSuperToken(token);
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
-      let flowOp = superToken.createFlow({
-        sender,
+      const signer = provider.getSigner(account);
+      const txData = cfaInterface.encodeFunctionData("createFlow", [
+        token,
         receiver,
-        flowRate: flowRateInWeiPerSecond
-      });
-      await flowOp.exec(provider.getSigner(accountIndex));
+        flowRateInWeiPerSecond,
+        "0x"
+      ]);
+      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      await tx.wait();
       message.success("Stream created successfully");
       setLoading(false);
     } catch (err) {
@@ -225,15 +176,17 @@ export default function Home() {
     if (!flowRate) return message.error("Please enter new flow rate");
     try {
       setLoading(true);
-      const superToken = await superfluidSdk.loadSuperToken(token);
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
-      let flowOp = superToken.updateFlow({
-        sender,
+      const signer = provider.getSigner(account);
+      const txData = cfaInterface.encodeFunctionData("updateFlow", [
+        token,
         receiver,
-        flowRate: flowRateInWeiPerSecond
-      });
-      await flowOp.exec(provider.getSigner(accountIndex));
+        flowRateInWeiPerSecond,
+        "0x"
+      ]);
+      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      await tx.wait();
       message.success("Stream updated successfully");
       setLoading(false);
     } catch (err) {
@@ -246,13 +199,15 @@ export default function Home() {
   const handleDeleteStream = async ({ token, sender, receiver }) => {
     try {
       setLoading(true);
-      const superToken = await superfluidSdk.loadSuperToken(token);
-      let flowOp = superToken.deleteFlow({
+      const signer = provider.getSigner(account);
+      const txData = cfaInterface.encodeFunctionData("deleteFlow", [
+        token,
         sender,
-        receiver
-      });
-
-      await flowOp.exec(provider.getSigner(accountIndex));
+        receiver,
+        "0x"
+      ]);
+      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      await tx.wait();
       message.success("Stream deleted successfully");
       setLoading(false);
     } catch (err) {
