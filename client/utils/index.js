@@ -3,14 +3,10 @@ import { gql } from "graphql-request";
 
 import addresses from "../config/contractAddresses.json";
 
-export const cfaABI = [
-  "function createFlow(address token, address receiver, int96 flowRate, bytes ctx) returns (bytes newCtx)",
-  "function updateFlow(address token, address receiver, int96 flowRate, bytes ctx) returns (bytes newCtx)",
-  "function deleteFlow(address token, address sender, address receiver, bytes ctx) returns(bytes newCtx)"
-];
-
-export const hostABI = [
-  "function callAgreement(address agreementClass, bytes callData, bytes userData) returns (bytes returnedData)",
+export const cfav1ForwarderABI = [
+  "function createFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) returns (bool)",
+  "function updateFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) returns (bool)",
+  "function deleteFlow(address token, address sender, address receiver, bytes userData) returns (bool)",
 ];
 
 export const erc20ABI = [

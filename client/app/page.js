@@ -6,7 +6,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { formatEther } from "@ethersproject/units";
 import { Contract } from "@ethersproject/contracts";
-import { Interface } from "@ethersproject/abi";
 import {
   Avatar,
   Button,
@@ -32,8 +31,7 @@ import styles from "./page.module.css";
 import addresses from "../config/contractAddresses.json";
 
 import {
-  cfaABI,
-  hostABI,
+  cfav1ForwarderABI,
   erc20ABI,
   tokens,
   calculateFlowRateInTokenPerMonth,
@@ -51,14 +49,8 @@ const client = new GraphQLClient(
   { headers: {} }
 );
 
-
-
-
-const cfaInterface = new Interface(cfaABI);
-
-const hostContract = new Contract(addresses.host, hostABI, provider);
-
 // load contracts
+const cfav1ForwarderContract = new Contract(addresses.cfav1Forwarder, cfav1ForwarderABI, provider);
 const fdaixContract = new Contract(
   addresses.fdaix,
   erc20ABI,
@@ -90,7 +82,7 @@ export default function Home() {
     searchInput: ""
   });
   const [balances, setBalances] = useState({
-    daix: 0,
+    fdaix: 0,
     fusdcx: 0,
     ftusdx: 0
   });
@@ -149,13 +141,13 @@ export default function Home() {
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const txData = cfaInterface.encodeFunctionData("createFlow", [
+      const tx = await cfav1ForwarderContract.connect(signer).createFlow(
         token,
+        sender,
         receiver,
         flowRateInWeiPerSecond,
         "0x"
-      ]);
-      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      );
       await tx.wait();
       message.success("Stream created successfully");
       setLoading(false);
@@ -179,13 +171,13 @@ export default function Home() {
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const txData = cfaInterface.encodeFunctionData("updateFlow", [
+      const tx = await cfav1ForwarderContract.connect(signer).updateFlow(
         token,
+        sender,
         receiver,
         flowRateInWeiPerSecond,
         "0x"
-      ]);
-      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      );
       await tx.wait();
       message.success("Stream updated successfully");
       setLoading(false);
@@ -200,13 +192,12 @@ export default function Home() {
     try {
       setLoading(true);
       const signer = provider.getSigner(account);
-      const txData = cfaInterface.encodeFunctionData("deleteFlow", [
+      const tx = await cfav1ForwarderContract.connect(signer).deleteFlow(
         token,
         sender,
         receiver,
         "0x"
-      ]);
-      const tx = await hostContract.connect(signer).callAgreement(addresses.cfa, txData, "0x");
+      );
       await tx.wait();
       message.success("Stream deleted successfully");
       setLoading(false);
