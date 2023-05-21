@@ -212,13 +212,8 @@ export default function Home() {
     if (account) {
       getStreams();
       // sync streams every 30 seconds
-      const intervalCall = setInterval(() => {
-        getStreams();
-      }, 30000);
-      return () => {
-        clearInterval(intervalCall);
-        window.ethereum.removeAllListeners();
-      };
+      const intervalId = setInterval(getStreams, 30000);
+      return () => clearInterval(intervalId);
     }
   }, [account]);
 

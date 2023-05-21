@@ -1,6 +1,6 @@
-# Superfluid Developer-Mode Dashboard: WIP
+# Superfluid Developer-Mode Dashboard
 
-> Terminal != Dashboard
+> CLI != Dashboard
 
 > A dashboard is a way of displaying various types of visual data in one place. Usually, a dashboard is intended to convey different, but related information in an easy-to-digest form. A dashboard is often called a control panel, but the terms are interchangeable.
 
