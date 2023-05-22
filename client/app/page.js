@@ -122,8 +122,8 @@ export default function Home() {
       message.success("Account connected");
     } catch (err) {
       setLoading(false);
-      console.error("Error connecting account:", err);
-      message.error("Error connecting account");
+      console.error("Failed to connect account:", err);
+      message.error("Failed to connect account. The Superfluid framework may not be deployed locally");
     }
   };
 
@@ -259,7 +259,7 @@ export default function Home() {
       })
       .catch((err) => {
         setDataLoading(false);
-        message.error("Something went wrong!");
+        message.error("Something went wrong. Is the Subgraph running?");
         console.error("failed to get streams: ", err);
       });
   };
