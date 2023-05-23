@@ -6,7 +6,7 @@ name: Deploy Superfluid Framework and Subgraph
 
 on:
   push:
-    branches: [main, develop, init, "feat/*"]
+    branches: [main, develop, init, alpha, "feat/*"]
     paths-ignore:
       - "README.md"
       - "client/**"
@@ -27,7 +27,6 @@ jobs:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }} on ${{ matrix.os }}
         uses: actions/setup-node@v3
-        # uses: borales/actions-yarn@v3.0.0
         with:
           node-version: ${{ matrix.node-version }}
       - name: "Install packages with latest npm"
@@ -43,7 +42,6 @@ jobs:
           sleep 40
           npm run codegen
           npm run create-local
-          npm run deploy-local
+          npx graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 salmandabbakuti/superfluid-devmode-dashboard --version-label v0.0.1
       - name: "Check Container Logs"
-        run: |
-          docker-compose logs --tail=9999
+        run: docker-compose logs --tail=9999
