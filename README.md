@@ -20,7 +20,7 @@ The Superfluid Developer-Mode Dashboard is a fullstack application that allows d
 
 The Developer-Mode Dashboard for Superfluid simplifies the process of creating, updating, and deleting, reading streams by eliminating the need to remember wallet/token addresses or type stream IDs. Here's a simplified description of the features:
 
-**1. Creating streams:** You can easily create streams by copying the recipient address from a dropdown menu and pasting it. Additionally, you can choose the desired token and specify the flow rate in a user-friendly "tokens per month" format.
+**1. Creating streams:** You can easily create streams by copying the recipient address from select account dropdown and pasting it. Additionally, you can choose the desired token and specify the flow rate in a user-friendly "tokens per month" format.
 
 **2. Updating streams:** To update a stream, you can simply click the edit button of the desired stream. There's no need to input the stream ID or sender/receiver addresses. Just enter the new flow rate and confirm the update.
 
