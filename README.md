@@ -83,11 +83,11 @@ npm run create-local
 npm run deploy-local
 ```
 
-### 3. Starting the Client Application:
-
-Finally, you will need to start the client application. Here are the steps to do this:
+### 3. Starting the Client Application (Optional):
 
 > Note: Running the client application is optional. You can use this [deployed frontend directly](https://superfluid-devmode-dashboard.vercel.app). Just ensure that your blockchain is running on port 8545 and that the framework and subgraph are deployed (following the previous steps).
+
+Finally, you will need to start the client application. Here are the steps to do this:
 
 1. Navigate to the client directory and install required dependencies:
 
