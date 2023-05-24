@@ -103,19 +103,32 @@ export default function Home() {
       });
   }, []);
 
+  useEffect(() => {
+    if (account) {
+      getStreams();
+      // sync streams every 30 seconds
+      const intervalId = setInterval(getStreams, 30000);
+      return () => clearInterval(intervalId);
+    }
+  }, [account]);
+
   const handleConnectAccount = async () => {
     try {
       setLoading(true);
       const selectedAccount = accounts[accountIndex];
       // get balances of all tokens
-      const fdaixBalance = await fdaixContract.balanceOf(selectedAccount);
-      const fusdcxBalance = await fusdcxContract.balanceOf(selectedAccount);
-      const ftusdxBalance = await ftusdxContract.balanceOf(selectedAccount);
+      const [fdaixBalance, fusdcxBalance, ftusdxBalance] = await Promise.all([
+        fdaixContract.balanceOf(selectedAccount),
+        fusdcxContract.balanceOf(selectedAccount),
+        ftusdxContract.balanceOf(selectedAccount)
+      ]);
+      // show balances upto 3 decimal places
       setBalances({
-        fdaix: formatEther(fdaixBalance),
-        fusdcx: formatEther(fusdcxBalance),
-        ftusdx: formatEther(ftusdxBalance)
+        fdaix: parseFloat(formatEther(fdaixBalance)).toFixed(3),
+        fusdcx: parseFloat(formatEther(fusdcxBalance)).toFixed(3),
+        ftusdx: parseFloat(formatEther(ftusdxBalance)).toFixed(3)
       });
+
       setAccount(selectedAccount.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
       setLoading(false);
@@ -207,15 +220,6 @@ export default function Home() {
       console.error("failed to delete stream: ", err);
     }
   };
-
-  useEffect(() => {
-    if (account) {
-      getStreams();
-      // sync streams every 30 seconds
-      const intervalId = setInterval(getStreams, 30000);
-      return () => clearInterval(intervalId);
-    }
-  }, [account]);
 
   const getStreams = () => {
     setDataLoading(true);
@@ -412,7 +416,12 @@ export default function Home() {
                     <Button
                       type="primary"
                       shape="round"
-                      onClick={() => window.location.reload()}
+                      onClick={() => {
+                        setAccount(null);
+                        setBalances({});
+                        setStreams([]);
+                        message.success("Account Disconnected");
+                      }}
                     >
                       Disconnect
                     </Button>
