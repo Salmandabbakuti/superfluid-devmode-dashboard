@@ -6,12 +6,15 @@ name: Deploy Superfluid Framework and Subgraph
 
 on:
   push:
-    branches: [main, develop, init, alpha, "feat/*"]
+    branches: [main, develop, "feat/*"]
     paths-ignore:
       - "README.md"
       - "client/**"
   pull_request:
-    branches: [main, develop, init, "feat/*"]
+    branches: [main, develop, "feat/*"]
+    paths-ignore:
+      - "README.md"
+      - "client/**"
 
 jobs:
   e2e-test:
@@ -42,6 +45,6 @@ jobs:
           sleep 40
           npm run codegen
           npm run create-local
-          npx graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 salmandabbakuti/superfluid-devmode-dashboard --version-label v0.0.1
+          npm run deploy-local
       - name: "Check Container Logs"
         run: docker-compose logs --tail=9999
