@@ -8,11 +8,13 @@ The Superfluid Developer-Mode Dashboard is a fullstack application that allows d
 
 #### Dashboard
 
-![sdd-dashboard-sc](https://user-images.githubusercontent.com/29351207/236810834-f3ac5d31-0fa0-4124-87a0-b6295b822182.png)
+![dashboard-sf-dm](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/1a72f10f-a830-472d-8819-0d7b34d27a26)
+
+![sf-dm-list](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/d4f75ab0-ec15-4a05-baf7-b5f95e5d16f3)
 
 #### Search
 
-![sdd-filter-sc](https://user-images.githubusercontent.com/29351207/236810862-a01266ea-18be-4403-aa29-f16e46bd5408.png)
+![sf-dm-search](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/5a0d7667-6b7f-4ab7-b436-69b3e4c98e9b)
 
 ### Features
 
