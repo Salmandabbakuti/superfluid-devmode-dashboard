@@ -1,6 +1,6 @@
-# Superfluid Developer-Mode Dashboard: WIP
+# Superfluid Developer-Mode Dashboard
 
-> Terminal != Dashboard
+> CLI != Dashboard
 
 > A dashboard is a way of displaying various types of visual data in one place. Usually, a dashboard is intended to convey different, but related information in an easy-to-digest form. A dashboard is often called a control panel, but the terms are interchangeable.
 
@@ -8,17 +8,19 @@ The Superfluid Developer-Mode Dashboard is a fullstack application that allows d
 
 #### Dashboard
 
-![sdd-dashboard-sc](https://user-images.githubusercontent.com/29351207/236810834-f3ac5d31-0fa0-4124-87a0-b6295b822182.png)
+![dashboard-sf-dm](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/1a72f10f-a830-472d-8819-0d7b34d27a26)
+
+![sf-dm-list](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/d4f75ab0-ec15-4a05-baf7-b5f95e5d16f3)
 
 #### Search
 
-![sdd-filter-sc](https://user-images.githubusercontent.com/29351207/236810862-a01266ea-18be-4403-aa29-f16e46bd5408.png)
+![sf-dm-search](https://github.com/Salmandabbakuti/superfluid-devmode-dashboard/assets/29351207/5a0d7667-6b7f-4ab7-b436-69b3e4c98e9b)
 
 ### Features
 
 The Developer-Mode Dashboard for Superfluid simplifies the process of creating, updating, and deleting, reading streams by eliminating the need to remember wallet/token addresses or type stream IDs. Here's a simplified description of the features:
 
-**1. Creating streams:** You can easily create streams by copying the recipient address from a dropdown menu and pasting it. Additionally, you can choose the desired token and specify the flow rate in a user-friendly "tokens per month" format.
+**1. Creating streams:** You can easily create streams by copying the recipient address from select account dropdown and pasting it. Additionally, you can choose the desired token and specify the flow rate in a user-friendly "tokens per month" format.
 
 **2. Updating streams:** To update a stream, you can simply click the edit button of the desired stream. There's no need to input the stream ID or sender/receiver addresses. Just enter the new flow rate and confirm the update.
 
@@ -81,11 +83,11 @@ npm run create-local
 npm run deploy-local
 ```
 
-### 3. Starting the Client Application:
-
-Finally, you will need to start the client application. Here are the steps to do this:
+### 3. Starting the Client Application (Optional):
 
 > Note: Running the client application is optional. You can use this [deployed frontend directly](https://superfluid-devmode-dashboard.vercel.app). Just ensure that your blockchain is running on port 8545 and that the framework and subgraph are deployed (following the previous steps).
+
+Finally, you will need to start the client application. Here are the steps to do this:
 
 1. Navigate to the client directory and install required dependencies:
 

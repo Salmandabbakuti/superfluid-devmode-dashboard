@@ -103,27 +103,40 @@ export default function Home() {
       });
   }, []);
 
+  useEffect(() => {
+    if (account) {
+      getStreams();
+      // sync streams every 30 seconds
+      const intervalId = setInterval(getStreams, 30000);
+      return () => clearInterval(intervalId);
+    }
+  }, [account]);
+
   const handleConnectAccount = async () => {
     try {
       setLoading(true);
       const selectedAccount = accounts[accountIndex];
       // get balances of all tokens
-      const fdaixBalance = await fdaixContract.balanceOf(selectedAccount);
-      const fusdcxBalance = await fusdcxContract.balanceOf(selectedAccount);
-      const ftusdxBalance = await ftusdxContract.balanceOf(selectedAccount);
+      const [fdaixBalance, fusdcxBalance, ftusdxBalance] = await Promise.all([
+        fdaixContract.balanceOf(selectedAccount),
+        fusdcxContract.balanceOf(selectedAccount),
+        ftusdxContract.balanceOf(selectedAccount)
+      ]);
+      // show balances upto 3 decimal places
       setBalances({
-        fdaix: formatEther(fdaixBalance),
-        fusdcx: formatEther(fusdcxBalance),
-        ftusdx: formatEther(ftusdxBalance)
+        fdaix: parseFloat(formatEther(fdaixBalance)).toFixed(3),
+        fusdcx: parseFloat(formatEther(fusdcxBalance)).toFixed(3),
+        ftusdx: parseFloat(formatEther(ftusdxBalance)).toFixed(3)
       });
+
       setAccount(selectedAccount.toLowerCase());
       setSearchFilter({ type: "", token: "", searchInput: "" });
       setLoading(false);
       message.success("Account connected");
     } catch (err) {
       setLoading(false);
-      console.error("Error connecting account:", err);
-      message.error("Error connecting account");
+      console.error("Failed to connect account:", err);
+      message.error("Failed to connect account. The Superfluid framework may not be deployed locally");
     }
   };
 
@@ -208,20 +221,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (account) {
-      getStreams();
-      // sync streams every 30 seconds
-      const intervalCall = setInterval(() => {
-        getStreams();
-      }, 30000);
-      return () => {
-        clearInterval(intervalCall);
-        window.ethereum.removeAllListeners();
-      };
-    }
-  }, [account]);
-
   const getStreams = () => {
     setDataLoading(true);
     // update search filters based on type
@@ -264,7 +263,7 @@ export default function Home() {
       })
       .catch((err) => {
         setDataLoading(false);
-        message.error("Something went wrong!");
+        message.error("Something went wrong. Is the Subgraph running?");
         console.error("failed to get streams: ", err);
       });
   };
@@ -417,7 +416,12 @@ export default function Home() {
                     <Button
                       type="primary"
                       shape="round"
-                      onClick={() => window.location.reload()}
+                      onClick={() => {
+                        setAccount(null);
+                        setBalances({});
+                        setStreams([]);
+                        message.success("Account Disconnected");
+                      }}
                     >
                       Disconnect
                     </Button>
