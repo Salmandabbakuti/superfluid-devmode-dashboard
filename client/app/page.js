@@ -127,7 +127,7 @@ export default function Home() {
     receiver,
     flowRate
   }) => {
-    console.log("create inputs: ", token, sender, receiver, flowRate);
+    console.log("create inputs: ", { token, sender, receiver, flowRate });
     if (!token || !sender || !receiver || !flowRate)
       return message.error("Please fill all the fields");
     try {
@@ -154,7 +154,7 @@ export default function Home() {
     receiver,
     flowRate
   }) => {
-    console.log("update inputs: ", token, sender, receiver, flowRate);
+    console.log("update inputs: ", { token, sender, receiver, flowRate });
     if (!flowRate) return message.error("Please enter new flow rate");
     try {
       setLoading(true);
@@ -175,6 +175,7 @@ export default function Home() {
   };
 
   const handleDeleteStream = async ({ token, sender, receiver }) => {
+    console.log("delete inputs: ", { token, sender, receiver });
     try {
       setLoading(true);
       const signer = provider.getSigner(account);
