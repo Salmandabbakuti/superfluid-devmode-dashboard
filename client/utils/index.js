@@ -1,17 +1,39 @@
 import { formatEther, parseEther } from "@ethersproject/units";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { Contract } from "@ethersproject/contracts";
 import { gql } from "graphql-request";
 
-import addresses from "../config/contractAddresses.json";
+import addresses from "./contractAddresses.json";
 
-export const cfav1ForwarderABI = [
+const cfav1ForwarderABI = [
   "function createFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) returns (bool)",
   "function updateFlow(address token, address sender, address receiver, int96 flowrate, bytes userData) returns (bool)",
   "function deleteFlow(address token, address sender, address receiver, bytes userData) returns (bool)",
 ];
 
-export const erc20ABI = [
+const erc20ABI = [
   "function balanceOf(address) external view returns (uint256)",
 ];
+
+export const provider = new JsonRpcProvider("http://localhost:8545");
+
+// load contracts
+export const cfav1ForwarderContract = new Contract(addresses.cfav1Forwarder, cfav1ForwarderABI, provider);
+export const fdaixContract = new Contract(
+  addresses.fdaix,
+  erc20ABI,
+  provider
+);
+export const fusdcxContract = new Contract(
+  addresses.fusdcx,
+  erc20ABI,
+  provider
+);
+export const ftusdxContract = new Contract(
+  addresses.ftusdx,
+  erc20ABI,
+  provider
+);
 
 export const tokens = [
   {

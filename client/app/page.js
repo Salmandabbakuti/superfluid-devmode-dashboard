@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import { GraphQLClient } from "graphql-request";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { formatEther } from "@ethersproject/units";
-import { Contract } from "@ethersproject/contracts";
 import {
   Avatar,
   Button,
@@ -28,18 +26,17 @@ import {
 } from "@ant-design/icons";
 import styles from "./page.module.css";
 
-import addresses from "../config/contractAddresses.json";
-
 import {
-  cfav1ForwarderABI,
-  erc20ABI,
+  provider,
+  fdaixContract,
+  fusdcxContract,
+  ftusdxContract,
+  cfav1ForwarderContract,
   tokens,
   calculateFlowRateInTokenPerMonth,
   calculateFlowRateInWeiPerSecond,
   STREAMS_QUERY
 } from "../utils";
-
-const provider = new JsonRpcProvider("http://localhost:8545");
 
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
@@ -47,24 +44,6 @@ dayjs.extend(relativeTime);
 const client = new GraphQLClient(
   "http://localhost:8000/subgraphs/name/salmandabbakuti/superfluid-devmode-dashboard",
   { headers: {} }
-);
-
-// load contracts
-const cfav1ForwarderContract = new Contract(addresses.cfav1Forwarder, cfav1ForwarderABI, provider);
-const fdaixContract = new Contract(
-  addresses.fdaix,
-  erc20ABI,
-  provider
-);
-const fusdcxContract = new Contract(
-  addresses.fusdcx,
-  erc20ABI,
-  provider
-);
-const ftusdxContract = new Contract(
-  addresses.ftusdx,
-  erc20ABI,
-  provider
 );
 
 export default function Home() {
@@ -136,7 +115,9 @@ export default function Home() {
     } catch (err) {
       setLoading(false);
       console.error("Failed to connect account:", err);
-      message.error("Failed to connect account. The Superfluid framework may not be deployed locally");
+      message.error(
+        "Failed to connect account. The Superfluid framework may not be deployed locally"
+      );
     }
   };
 
@@ -154,13 +135,9 @@ export default function Home() {
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).createFlow(
-        token,
-        sender,
-        receiver,
-        flowRateInWeiPerSecond,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .createFlow(token, sender, receiver, flowRateInWeiPerSecond, "0x");
       await tx.wait();
       message.success("Stream created successfully");
       setLoading(false);
@@ -184,13 +161,9 @@ export default function Home() {
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).updateFlow(
-        token,
-        sender,
-        receiver,
-        flowRateInWeiPerSecond,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .updateFlow(token, sender, receiver, flowRateInWeiPerSecond, "0x");
       await tx.wait();
       message.success("Stream updated successfully");
       setLoading(false);
@@ -205,12 +178,9 @@ export default function Home() {
     try {
       setLoading(true);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).deleteFlow(
-        token,
-        sender,
-        receiver,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .deleteFlow(token, sender, receiver, "0x");
       await tx.wait();
       message.success("Stream deleted successfully");
       setLoading(false);
@@ -490,18 +460,24 @@ export default function Home() {
                     value={i}
                     key={i}
                     onMouseEnter={(e) => {
-                      const copyIcon = e.target.querySelector('.copy-icon');
-                      if (copyIcon) copyIcon.style.display = 'inline-block';
+                      const copyIcon = e.target.querySelector(".copy-icon");
+                      if (copyIcon) copyIcon.style.display = "inline-block";
                     }}
                     onMouseLeave={(e) => {
-                      const copyIcon = e.target.querySelector('.copy-icon');
-                      if (copyIcon) copyIcon.style.display = 'none';
+                      const copyIcon = e.target.querySelector(".copy-icon");
+                      if (copyIcon) copyIcon.style.display = "none";
                     }}
                   >
-                    {`Account #${i} - ${account.slice(0, 8)}...${account.slice(-5)}`}
+                    {`Account #${i + 1} - ${account.slice(0, 8)}...${account.slice(
+                      -5
+                    )}`}
                     <CopyOutlined
                       className="copy-icon"
-                      style={{ marginLeft: 10, fontSize: '17px', display: 'none' }}
+                      style={{
+                        marginLeft: 10,
+                        fontSize: "17px",
+                        display: "none"
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(account);
