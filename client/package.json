@@ -1,8 +1,10 @@
 {
-  "name": "next-antd-boilerplate",
-  "description": "Next.js13 + Ant Design boilerplate",
+  "name": "superfluid-devmode-dashboard-client",
+  "description": "Superfluid Devmode Dashboard Client",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Salman Dabbakuti",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
