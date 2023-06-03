@@ -3,9 +3,7 @@ import { useEffect, useState } from "react";
 import { GraphQLClient } from "graphql-request";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { formatEther } from "@ethersproject/units";
-import { Contract } from "@ethersproject/contracts";
 import {
   Avatar,
   Button,
@@ -17,8 +15,7 @@ import {
   Table,
   Tag,
   Select,
-  Popconfirm,
-  InputNumber
+  Popconfirm
 } from "antd";
 import {
   SyncOutlined,
@@ -27,19 +24,19 @@ import {
   CopyOutlined
 } from "@ant-design/icons";
 import styles from "./page.module.css";
-
-import addresses from "../config/contractAddresses.json";
+import "antd/dist/antd.css";
 
 import {
-  cfav1ForwarderABI,
-  erc20ABI,
+  provider,
+  fdaixContract,
+  fusdcxContract,
+  ftusdxContract,
+  cfav1ForwarderContract,
   tokens,
   calculateFlowRateInTokenPerMonth,
   calculateFlowRateInWeiPerSecond,
   STREAMS_QUERY
 } from "../utils";
-
-const provider = new JsonRpcProvider("http://localhost:8545");
 
 const { Header, Footer, Sider, Content } = Layout;
 dayjs.extend(relativeTime);
@@ -49,31 +46,13 @@ const client = new GraphQLClient(
   { headers: {} }
 );
 
-// load contracts
-const cfav1ForwarderContract = new Contract(addresses.cfav1Forwarder, cfav1ForwarderABI, provider);
-const fdaixContract = new Contract(
-  addresses.fdaix,
-  erc20ABI,
-  provider
-);
-const fusdcxContract = new Contract(
-  addresses.fusdcx,
-  erc20ABI,
-  provider
-);
-const ftusdxContract = new Contract(
-  addresses.ftusdx,
-  erc20ABI,
-  provider
-);
-
 export default function Home() {
   const [accounts, setAccounts] = useState([]);
   const [account, setAccount] = useState(null);
   const [accountIndex, setAccountIndex] = useState(0);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
-  const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
+  const [updatedFlowRate, setUpdatedFlowRate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const [searchFilter, setSearchFilter] = useState({
@@ -136,7 +115,9 @@ export default function Home() {
     } catch (err) {
       setLoading(false);
       console.error("Failed to connect account:", err);
-      message.error("Failed to connect account. The Superfluid framework may not be deployed locally");
+      message.error(
+        "Failed to connect account. The Superfluid framework may not be deployed locally"
+      );
     }
   };
 
@@ -146,7 +127,7 @@ export default function Home() {
     receiver,
     flowRate
   }) => {
-    console.log("create inputs: ", token, sender, receiver, flowRate);
+    console.log("create inputs: ", { token, sender, receiver, flowRate });
     if (!token || !sender || !receiver || !flowRate)
       return message.error("Please fill all the fields");
     try {
@@ -154,13 +135,9 @@ export default function Home() {
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).createFlow(
-        token,
-        sender,
-        receiver,
-        flowRateInWeiPerSecond,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .createFlow(token, sender, receiver, flowRateInWeiPerSecond, "0x");
       await tx.wait();
       message.success("Stream created successfully");
       setLoading(false);
@@ -177,20 +154,16 @@ export default function Home() {
     receiver,
     flowRate
   }) => {
-    console.log("update inputs: ", token, sender, receiver, flowRate);
+    console.log("update inputs: ", { token, sender, receiver, flowRate });
     if (!flowRate) return message.error("Please enter new flow rate");
     try {
       setLoading(true);
       const flowRateInWeiPerSecond = calculateFlowRateInWeiPerSecond(flowRate);
       console.log("flowRateInWeiPerSecond: ", flowRateInWeiPerSecond);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).updateFlow(
-        token,
-        sender,
-        receiver,
-        flowRateInWeiPerSecond,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .updateFlow(token, sender, receiver, flowRateInWeiPerSecond, "0x");
       await tx.wait();
       message.success("Stream updated successfully");
       setLoading(false);
@@ -202,15 +175,13 @@ export default function Home() {
   };
 
   const handleDeleteStream = async ({ token, sender, receiver }) => {
+    console.log("delete inputs: ", { token, sender, receiver });
     try {
       setLoading(true);
       const signer = provider.getSigner(account);
-      const tx = await cfav1ForwarderContract.connect(signer).deleteFlow(
-        token,
-        sender,
-        receiver,
-        "0x"
-      );
+      const tx = await cfav1ForwarderContract
+        .connect(signer)
+        .deleteFlow(token, sender, receiver, "0x");
       await tx.wait();
       message.success("Stream deleted successfully");
       setLoading(false);
@@ -364,10 +335,12 @@ export default function Home() {
             <Space size="small">
               <Popconfirm
                 title={
-                  <InputNumber
+                  <Input
+                    type="number"
+                    placeholder="Flowrate in no. of tokens"
                     addonAfter="/month"
-                    placeholder="New Flow Rate"
-                    onChange={(val) => setUpdatedFlowRate(val)}
+                    value={updatedFlowRate}
+                    onChange={(e) => setUpdatedFlowRate(e.target.value)}
                   />
                 }
                 // add descrition as input number to update flow rate
@@ -490,18 +463,24 @@ export default function Home() {
                     value={i}
                     key={i}
                     onMouseEnter={(e) => {
-                      const copyIcon = e.target.querySelector('.copy-icon');
-                      if (copyIcon) copyIcon.style.display = 'inline-block';
+                      const copyIcon = e.target.querySelector(".copy-icon");
+                      if (copyIcon) copyIcon.style.display = "inline-block";
                     }}
                     onMouseLeave={(e) => {
-                      const copyIcon = e.target.querySelector('.copy-icon');
-                      if (copyIcon) copyIcon.style.display = 'none';
+                      const copyIcon = e.target.querySelector(".copy-icon");
+                      if (copyIcon) copyIcon.style.display = "none";
                     }}
                   >
-                    {`Account #${i} - ${account.slice(0, 8)}...${account.slice(-5)}`}
+                    {`Account #${i + 1} - ${account.slice(0, 8)}...${account.slice(
+                      -5
+                    )}`}
                     <CopyOutlined
                       className="copy-icon"
-                      style={{ marginLeft: 10, fontSize: '17px', display: 'none' }}
+                      style={{
+                        marginLeft: 10,
+                        fontSize: "17px",
+                        display: "none"
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         navigator.clipboard.writeText(account);
@@ -584,13 +563,14 @@ export default function Home() {
                       ))}
                     </Select>
                     {/*  add flowrate input */}
-                    <InputNumber
+                    <Input
+                      type="number"
                       name="flowRate"
                       addonAfter="/month"
-                      placeholder="Flow Rate"
-                      value={streamInput?.flowRate || 0}
-                      onChange={(val) =>
-                        setStreamInput({ ...streamInput, flowRate: val })
+                      placeholder="Flowrate in no. of tokens"
+                      value={streamInput?.flowRate}
+                      onChange={(e) =>
+                        setStreamInput({ ...streamInput, flowRate: e.target.value })
                       }
                       style={{
                         borderRadius: 10,

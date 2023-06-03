@@ -1,8 +1,10 @@
 {
-  "name": "next-antd-boilerplate",
-  "description": "Next.js13 + Ant Design boilerplate",
+  "name": "superfluid-devmode-dashboard-client",
+  "description": "Superfluid Devmode Dashboard Client",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": "Salman Dabbakuti",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,7 +20,7 @@
     "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
     "graphql-request": "^5.1.0",
-    "next": "13.1.6",
+    "next": "^13.4.4",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },

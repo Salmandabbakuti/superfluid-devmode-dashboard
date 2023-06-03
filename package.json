@@ -1,12 +1,16 @@
 {
-  "name": "hardhat-boilerplate",
+  "name": "superfluid-devmode-dashboard",
   "version": "1.0.0",
-  "description": "hardhat and ethersjs minimal boilerplate for Dapp development",
+  "description": "Superfluid Devmode Dashboard",
   "main": "index.js",
+  "private": true,
+  "author": "Salman Dabbakuti",
+  "license": "MIT",
+  "keywords": [],
   "scripts": {
     "contracts:compile": "npx hardhat compile",
     "contracts:deploy": "npx hardhat deploy",
-    "prepare:manifest": "mustache client/config/contractAddresses.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:manifest": "mustache client/utils/contractAddresses.json subgraph.template.yaml > subgraph.yaml",
     "codegen": "npm run prepare:manifest && graph codegen",
     "build": "graph build",
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ salmandabbakuti/superfluid-devmode-dashboard",
@@ -14,9 +18,6 @@
     "remove-local": "graph remove --node http://localhost:8020/ salmandabbakuti/superfluid-devmode-dashboard",
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 salmandabbakuti/superfluid-devmode-dashboard"
   },
-  "keywords": [],
-  "author": "Salman Dabbakuti",
-  "license": "ISC",
   "dependencies": {
     "@graphprotocol/graph-cli": "0.48.0",
     "@graphprotocol/graph-ts": "0.29.3"
@@ -24,7 +25,7 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
     "@superfluid-finance/ethereum-contracts": "^1.6.0",
-    "@superfluid-finance/sdk-core": "0.4.4",
+    "@superfluid-finance/sdk-core": "^0.6.6",
     "hardhat": "^2.14.0",
     "mustache": "^4.2.0"
   }
