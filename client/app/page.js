@@ -25,6 +25,7 @@ import {
   CopyOutlined
 } from "@ant-design/icons";
 import styles from "./page.module.css";
+import "antd/dist/antd.css";
 
 import {
   provider,
@@ -52,7 +53,7 @@ export default function Home() {
   const [accountIndex, setAccountIndex] = useState(0);
   const [streams, setStreams] = useState([]);
   const [streamInput, setStreamInput] = useState({ token: tokens[0].address });
-  const [updatedFlowRate, setUpdatedFlowRate] = useState(0);
+  const [updatedFlowRate, setUpdatedFlowRate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
   const [searchFilter, setSearchFilter] = useState({
@@ -335,10 +336,12 @@ export default function Home() {
             <Space size="small">
               <Popconfirm
                 title={
-                  <InputNumber
+                  <Input
+                    type="number"
+                    placeholder="Flowrate in no. of tokens"
                     addonAfter="/month"
-                    placeholder="New Flow Rate"
-                    onChange={(val) => setUpdatedFlowRate(val)}
+                    value={updatedFlowRate}
+                    onChange={(e) => setUpdatedFlowRate(e.target.value)}
                   />
                 }
                 // add descrition as input number to update flow rate
@@ -561,13 +564,14 @@ export default function Home() {
                       ))}
                     </Select>
                     {/*  add flowrate input */}
-                    <InputNumber
+                    <Input
+                      type="number"
                       name="flowRate"
                       addonAfter="/month"
-                      placeholder="Flow Rate"
-                      value={streamInput?.flowRate || 0}
-                      onChange={(val) =>
-                        setStreamInput({ ...streamInput, flowRate: val })
+                      placeholder="Flowrate in no. of tokens"
+                      value={streamInput?.flowRate}
+                      onChange={(e) =>
+                        setStreamInput({ ...streamInput, flowRate: e.target.value })
                       }
                       style={{
                         borderRadius: 10,

@@ -1,10 +1,13 @@
 import './globals.css';
-import "antd/dist/antd.css";
+
+export const metadata = {
+  title: 'Superfluid Devmode Dashboard',
+  description: 'Superfluid Devmode Dashboard for local development',
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <head />
       <body>
         {children}
       </body>
