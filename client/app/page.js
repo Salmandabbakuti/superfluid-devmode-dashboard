@@ -15,8 +15,7 @@ import {
   Table,
   Tag,
   Select,
-  Popconfirm,
-  InputNumber
+  Popconfirm
 } from "antd";
 import {
   SyncOutlined,
