@@ -8,8 +8,6 @@
   "license": "MIT",
   "keywords": [],
   "scripts": {
-    "contracts:compile": "npx hardhat compile",
-    "contracts:deploy": "npx hardhat deploy",
     "prepare:manifest": "mustache client/utils/contractAddresses.json subgraph.template.yaml > subgraph.yaml",
     "codegen": "npm run prepare:manifest && graph codegen",
     "build": "graph build",
