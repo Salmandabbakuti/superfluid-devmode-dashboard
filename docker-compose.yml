@@ -29,8 +29,6 @@ services:
     # restart: always
     ports:
       - '5001:5001'
-    volumes:
-      - ./data/ipfs:/data/ipfs
   postgres:
     container_name: postgres
     image: postgres
@@ -43,5 +41,3 @@ services:
       POSTGRES_PASSWORD: let-me-in
       POSTGRES_DB: graph-node
       POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
