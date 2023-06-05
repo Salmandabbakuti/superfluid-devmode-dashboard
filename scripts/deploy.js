@@ -19,11 +19,11 @@ async function main() {
     protocolReleaseVersion: "test"
   });
 
-  // deploy wrapper tokens dai,usdc,usdt and store addresses in local file
-  console.log("[INFO]: Deploying wrapper token contracts [fDAIx, fUSDCx, fTUSDx]");
+  console.log("[INFO]: Deploying wrapper token contracts [fDAI, fUSDC, fTUSD]");
 
   const millionTokens = ethers.utils.parseEther("1000000").toString();
-  // deploying 1 million test DAI, USDC, TUSD tokens and wrapping them
+
+  // deploying 1 million test fDAI, fUSDC, fTUSD tokens and wrapping them
   await superTokenDeployer.deployWrapperSuperToken(
     "Fake DAI Token",
     "fDAI",
@@ -45,10 +45,9 @@ async function main() {
     millionTokens
   );
 
-  const thousandTokens = ethers.utils.parseEther("1000");
-
   console.log("[INFO]: Minting and upgrading wrapper tokens [fDAIx, fUSDCx, fTUSDx] to first 3 accounts");
-  // load wrapper tokens and mint to all accounts
+
+  // load wrapper tokens
   const fdaix = await sf.loadSuperToken("fDAIx");
   const fdai = new ethers.Contract(fdaix.underlyingToken.address, TestToken.abi, owner);
 
@@ -59,60 +58,55 @@ async function main() {
   const ftusd = new ethers.Contract(ftusdx.underlyingToken.address, TestToken.abi, owner);
 
 
+  const thousandTokens = ethers.utils.parseEther("1000");
 
-  // minting and wrapping test DAI to all accounts
+  // minting fDAI to first 3 accounts
   await fdai.mint(owner.address, thousandTokens);
   await fdai.mint(account1.address, thousandTokens);
   await fdai.mint(account2.address, thousandTokens);
 
-  // minting and wrapping test USDC to all accounts
+  // minting fUSDC to first 3 accounts
   await fusdc.mint(owner.address, thousandTokens);
   await fusdc.mint(account1.address, thousandTokens);
   await fusdc.mint(account2.address, thousandTokens);
 
-  // minting and wrapping test TUSD to all accounts
+  // minting fTUSD to first 3 accounts
   await ftusd.mint(owner.address, thousandTokens);
   await ftusd.mint(account1.address, thousandTokens);
   await ftusd.mint(account2.address, thousandTokens);
 
-  // approving DAIx to spend DAI (Super Token object is not an ethers contract object and has different operation syntax)
+  // approving fDAIx to spend fDAI
   await fdai.approve(fdaix.address, thousandTokens);
   await fdai.connect(account1).approve(fdaix.address, thousandTokens);
   await fdai.connect(account2).approve(fdaix.address, thousandTokens);
-  // Upgrading all DAI to DAIx
-  const ownerUpgradeDAI = fdaix.upgrade({ amount: thousandTokens });
-  const account1UpgradeDAI = fdaix.upgrade({ amount: thousandTokens });
-  const account2UpgradeDAI = fdaix.upgrade({ amount: thousandTokens });
+  // Upgrading all fDAI to fDAIx for first 3 accounts
+  const upgradeFDAI = fdaix.upgrade({ amount: thousandTokens });
 
-  await ownerUpgradeDAI.exec(owner);
-  await account1UpgradeDAI.exec(account1);
-  await account2UpgradeDAI.exec(account2);
+  await upgradeFDAI.exec(owner);
+  await upgradeFDAI.exec(account1);
+  await upgradeFDAI.exec(account2);
 
-  // approving USDCx to spend USDC (Super Token object is not an ethers contract object and has different operation syntax)
+  // approving fUSDCx to spend fUSDC
   await fusdc.approve(fusdcx.address, thousandTokens);
   await fusdc.connect(account1).approve(fusdcx.address, thousandTokens);
   await fusdc.connect(account2).approve(fusdcx.address, thousandTokens);
-  // Upgrading all USDC to USDCx
-  const ownerUpgradeUSDC = fusdcx.upgrade({ amount: thousandTokens });
-  const account1UpgradeUSDC = fusdcx.upgrade({ amount: thousandTokens });
-  const account2UpgradeUSDC = fusdcx.upgrade({ amount: thousandTokens });
+  // Upgrading all fUSDC to fUSDCx
+  const upgradeFUSDC = fusdcx.upgrade({ amount: thousandTokens });
 
-  await ownerUpgradeUSDC.exec(owner);
-  await account1UpgradeUSDC.exec(account1);
-  await account2UpgradeUSDC.exec(account2);
+  await upgradeFUSDC.exec(owner);
+  await upgradeFUSDC.exec(account1);
+  await upgradeFUSDC.exec(account2);
 
-  // approving TUSDx to spend TUSD (Super Token object is not an ethers contract object and has different operation syntax)
+  // approving fTUSDx to spend fTUSD
   await ftusd.approve(ftusdx.address, thousandTokens);
   await ftusd.connect(account1).approve(ftusdx.address, thousandTokens);
   await ftusd.connect(account2).approve(ftusdx.address, thousandTokens);
-  // Upgrading all TUSD to TUSDx
-  const ownerUpgradeTUSD = ftusdx.upgrade({ amount: thousandTokens });
-  const account1UpgradeTUSD = ftusdx.upgrade({ amount: thousandTokens });
-  const account2UpgradeTUSD = ftusdx.upgrade({ amount: thousandTokens });
+  // Upgrading all fTUSD to fTUSDx
+  const upgradeFTUSD = ftusdx.upgrade({ amount: thousandTokens });
 
-  await ownerUpgradeTUSD.exec(owner);
-  await account1UpgradeTUSD.exec(account1);
-  await account2UpgradeTUSD.exec(account2);
+  await upgradeFTUSD.exec(owner);
+  await upgradeFTUSD.exec(account1);
+  await upgradeFTUSD.exec(account2);
 
   console.log("[INFO]: Copying addresses to local file");
 
@@ -131,7 +125,7 @@ async function main() {
   };
   fs.writeFileSync("./client/utils/contractAddresses.json", JSON.stringify(addresses, null, 2));
 
-  console.log("[INFO]: Done deploying and minting wrapper tokens [fDAIx, fUSDCx, fTUSDx]");
+  console.log("[INFO]: Done deploying, minting and upgrading wrapper tokens [fDAIx, fUSDCx, fTUSDx]");
 }
 
 main()
