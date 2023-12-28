@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.1",
-    "@superfluid-finance/ethereum-contracts": "^1.6.0",
-    "@superfluid-finance/sdk-core": "^0.6.6",
+    "@superfluid-finance/ethereum-contracts": "1.6.0",
+    "@superfluid-finance/sdk-core": "0.6.6",
     "hardhat": "^2.14.0",
     "mustache": "^4.2.0"
   }

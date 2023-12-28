@@ -62,7 +62,8 @@ export const tokens = [
 export const calculateFlowRateInTokenPerMonth = (amount) => {
   if (isNaN(amount)) return 0;
   // convert from wei/sec to token/month for displaying in UI
-  const flowRate = (formatEther(amount) * 2592000).toFixed(9);
+  // 2628000 = 1 month in seconds(sf recommendation)
+  const flowRate = (formatEther(amount) * 2628000).toFixed(9);
   // if flowRate is floating point number, remove unncessary trailing zeros
   return flowRate.replace(/\.?0+$/, "");
 };
@@ -70,7 +71,7 @@ export const calculateFlowRateInTokenPerMonth = (amount) => {
 export const calculateFlowRateInWeiPerSecond = (amount) => {
   // convert amount from token/month to wei/second for sending to superfluid
   const flowRateInWeiPerSecond = parseEther(amount.toString())
-    .div(2592000)
+    .div(2628000)
     .toString();
   return flowRateInWeiPerSecond;
 };

@@ -21,7 +21,8 @@ import {
   SyncOutlined,
   EditOutlined,
   DeleteOutlined,
-  CopyOutlined
+  CopyOutlined,
+  DisconnectOutlined
 } from "@ant-design/icons";
 import styles from "./page.module.css";
 import "antd/dist/antd.css";
@@ -38,7 +39,7 @@ import {
   STREAMS_QUERY
 } from "../utils";
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Header, Footer, Content } = Layout;
 dayjs.extend(relativeTime);
 
 const client = new GraphQLClient(
@@ -66,7 +67,7 @@ export default function Home() {
     ftusdx: 0
   });
 
-  //  getting list of accounts from provider
+  // getting list of accounts from provider
   useEffect(() => {
     provider
       .listAccounts()
@@ -82,9 +83,11 @@ export default function Home() {
       });
   }, []);
 
+  // getting token balances and streams on account change
   useEffect(() => {
     if (account) {
       getStreams();
+      getTokenBalances();
       // sync streams every 30 seconds
       const intervalId = setInterval(getStreams, 30000);
       return () => clearInterval(intervalId);
@@ -92,14 +95,26 @@ export default function Home() {
   }, [account]);
 
   const handleConnectAccount = async () => {
+    if (!accounts.length)
+      return message.error(
+        "Failed to connect account. Please ensure local blockchain node is running on port 8545"
+      );
+    setLoading(true);
+    const selectedAccount = accounts[accountIndex];
+    setAccount(selectedAccount.toLowerCase());
+    setSearchFilter({ type: "", token: "", searchInput: "" });
+    setLoading(false);
+    message.success("Account connected");
+  };
+
+  const getTokenBalances = async () => {
+    // get balances of all supportedTokens
+    setDataLoading(true);
     try {
-      setLoading(true);
-      const selectedAccount = accounts[accountIndex];
-      // get balances of all tokens
       const [fdaixBalance, fusdcxBalance, ftusdxBalance] = await Promise.all([
-        fdaixContract.balanceOf(selectedAccount),
-        fusdcxContract.balanceOf(selectedAccount),
-        ftusdxContract.balanceOf(selectedAccount)
+        fdaixContract.balanceOf(account),
+        fusdcxContract.balanceOf(account),
+        ftusdxContract.balanceOf(account)
       ]);
       // show balances upto 3 decimal places
       setBalances({
@@ -107,17 +122,12 @@ export default function Home() {
         fusdcx: parseFloat(formatEther(fusdcxBalance)).toFixed(3),
         ftusdx: parseFloat(formatEther(ftusdxBalance)).toFixed(3)
       });
-
-      setAccount(selectedAccount.toLowerCase());
-      setSearchFilter({ type: "", token: "", searchInput: "" });
-      setLoading(false);
-      message.success("Account connected");
+      setDataLoading(false);
+      console.log("balances: ", balances);
     } catch (err) {
-      setLoading(false);
-      console.error("Failed to connect account:", err);
-      message.error(
-        "Failed to connect account. The Superfluid framework may not be deployed locally"
-      );
+      message.error("Something went wrong. Is the node running?");
+      console.error("Failed to fetch balances:", err);
+      setDataLoading(false);
     }
   };
 
@@ -253,7 +263,7 @@ export default function Home() {
         };
         return (
           <>
-            <Avatar shape="circle" size="large" src={tokenData.icon} />
+            <Avatar shape="circle" size="small" src={tokenData.icon} />
             <a
               href={`http://localhost:8545/token/${token}`}
               target="_blank"
@@ -376,300 +386,281 @@ export default function Home() {
   ];
 
   return (
-    <>
-      <Layout style={{ minHeight: "100vh" }}>
-        <Sider theme="dark" breakpoint="lg" collapsedWidth="0">
-          {account && (
+    <Layout style={{ minHeight: "100vh" }}>
+      <Header className="site-layout-background" style={{ padding: 0 }}>
+        <h3 style={{ textAlign: "center", color: "white" }}>
+          Superfluid Devmode Dashboard
+        </h3>
+      </Header>
+      <Content
+        className="site-layout-background"
+        style={{
+          margin: "24px 16px",
+          padding: 24,
+          minHeight: 280
+        }}
+      >
+        <Space>
+          <label htmlFor="account">Select Account:</label>
+          <Select
+            defaultValue={0}
+            name="account"
+            id="account"
+            loading={loading}
+            value={accountIndex}
+            style={{
+              borderRadius: 10,
+              width: 310
+            }}
+            onChange={(val) => setAccountIndex(val)}
+          >
+            {accounts.map((acc, i) => (
+              <Select.Option
+                value={i}
+                key={i}
+                onMouseEnter={(e) => {
+                  const copyIcon = e.target.querySelector(".copy-icon");
+                  if (copyIcon) copyIcon.style.display = "inline-block";
+                }}
+                onMouseLeave={(e) => {
+                  const copyIcon = e.target.querySelector(".copy-icon");
+                  if (copyIcon) copyIcon.style.display = "none";
+                }}
+              >
+                {`Account #${i + 1} - ${acc.slice(0, 8)}...${acc.slice(-5)}`}
+                <DisconnectOutlined
+                  title="Disconnect"
+                  style={{
+                    marginLeft: 5,
+                    fontSize: "17px",
+                    display:
+                      acc?.toLowerCase() === account ? "inline-block" : "none"
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAccount(null);
+                    setStreamInput({ token: tokens[0].address });
+                    setSearchFilter({ type: "", token: "", searchInput: "" });
+                    message.success("Account disconnected");
+                  }}
+                />
+                <CopyOutlined
+                  className="copy-icon"
+                  style={{
+                    marginLeft: 5,
+                    fontSize: "17px",
+                    display: "none"
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(acc);
+                    message.success("Address copied to clipboard");
+                  }}
+                />
+              </Select.Option>
+            ))}
+          </Select>
+          <Button
+            type="primary"
+            shape="round"
+            disabled={loading}
+            onClick={handleConnectAccount}
+          >
+            Connect
+          </Button>
+        </Space>
+        {account && (
+          <div>
+            {/* Balances Section Starts */}
             <Card
-              type="inner"
-              size="small"
-              title={
-                <Card.Meta
-                  title={
-                    <Button
-                      type="primary"
-                      shape="round"
-                      onClick={() => {
-                        setAccount(null);
-                        setBalances({});
-                        setStreams([]);
-                        message.success("Account Disconnected");
-                      }}
-                    >
-                      Disconnect
-                    </Button>
-                  }
-                  description={`${account.slice(0, 8)}...${account.slice(-8)}`}
-                  avatar={
-                    <Avatar
-                      shape="circle"
-                      size="large"
-                      alt="Profile"
-                      src={`https://api.dicebear.com/5.x/open-peeps/svg?seed=${account}`}
-                    />
-                  }
+              bordered
+              title="Super Tokens"
+              className={styles.cardContainer}
+              style={{ marginBottom: 20 }}
+              extra={
+                <Button
+                  type="primary"
+                  shape="circle"
+                  onClick={getTokenBalances}
+                  disabled={loading}
+                  icon={<SyncOutlined spin={dataLoading} />}
                 />
               }
             >
-              <Card.Meta
-                title="Balances"
-                description={
-                  <Space direction="vertical">
-                    {tokens.map((token) => (
-                      <span key={token.address}>
-                        <Avatar shape="circle" size="small" src={token.icon} />
-                        <span style={{ marginLeft: 10 }}>{token.symbol}</span>
-                        <span style={{ marginLeft: 10 }}>
-                          {balances[token.name.toLowerCase()] || 0}
-                        </span>
-                      </span>
-                    ))}
-                  </Space>
-                }
-              />
+              {tokens.map((token, i) => (
+                <Space key={i}>
+                  <Avatar shape="circle" size="small" src={token.icon} />
+                  <span>{token.symbol}</span>
+                  <span>
+                    {balances[token?.name?.toLowerCase()] || "0.0"}
+                  </span>{" "}
+                </Space>
+              ))}
             </Card>
-          )}
-        </Sider>
-        <Layout className="site-layout">
-          <Header className="site-layout-background" style={{ padding: 0 }}>
-            <h1 style={{ textAlign: "center", color: "white" }}>
-              Superfluid Devmode Dashboard
-            </h1>
-          </Header>
-          <Content
-            className="site-layout-background"
-            style={{
-              margin: "24px 16px",
-              padding: 24,
-              minHeight: 280
-            }}
-          >
-            <Space>
-              <label htmlFor="account">Select Account:</label>
-              <Select
-                defaultValue={0}
-                name="account"
-                id="account"
-                loading={loading}
-                value={accountIndex}
+            {/* Balances Section Ends */}
+            {/* Create Stream Section Starts */}
+            <Card
+              bordered
+              title="Create Stream"
+              className={styles.cardContainer}
+              actions={[
+                <Button
+                  key="create"
+                  type="primary"
+                  shape="round"
+                  style={{ marginTop: 10 }}
+                  disabled={loading}
+                  loading={loading}
+                  onClick={() => handleCreateStream(streamInput)}
+                >
+                  Send
+                </Button>
+              ]}
+            >
+              <Input
+                type="text"
+                placeholder="Receiver Wallet Address"
+                name="receiver"
+                value={streamInput.receiver || ""}
+                onChange={(e) =>
+                  setStreamInput({
+                    ...streamInput,
+                    receiver: e.target.value
+                  })
+                }
                 style={{
                   borderRadius: 10,
-                  width: 280
+                  marginBottom: 10
                 }}
-                onChange={(val) => setAccountIndex(val)}
+              />
+              <Space>
+                <label htmlFor="token">Select Token:</label>
+                <Select
+                  defaultValue={tokens[0].symbol}
+                  name="token"
+                  id="token"
+                  value={streamInput?.token || tokens[0].address}
+                  style={{
+                    borderRadius: 10,
+                    marginBottom: 10
+                  }}
+                  onChange={(val) =>
+                    setStreamInput({ ...streamInput, token: val })
+                  }
+                >
+                  {tokens.map((token, i) => (
+                    <Select.Option value={token.address} key={i}>
+                      <Avatar shape="circle" size="small" src={token.icon} />{" "}
+                      {token.symbol}
+                    </Select.Option>
+                  ))}
+                </Select>
+                {/*  add flowrate input */}
+                <Input
+                  type="number"
+                  name="flowRate"
+                  addonAfter="/month"
+                  placeholder="Flowrate in no. of tokens"
+                  value={streamInput?.flowRate}
+                  onChange={(e) =>
+                    setStreamInput({ ...streamInput, flowRate: e.target.value })
+                  }
+                  style={{
+                    borderRadius: 10,
+                    marginBottom: 10
+                    // width: 120
+                  }}
+                />
+              </Space>
+            </Card>
+            {/* Create Stream Section Ends */}
+            {/* Streams Table Starts */}
+            <h2>My Streams</h2>
+            <Space>
+              <label htmlFor="search">Token:</label>
+              <Select
+                defaultValue=""
+                style={{ width: 120 }}
+                value={searchFilter?.token || ""}
+                onChange={(val) =>
+                  setSearchFilter({ ...searchFilter, token: val })
+                }
               >
-                {accounts.map((account, i) => (
-                  <Select.Option
-                    value={i}
-                    key={i}
-                    onMouseEnter={(e) => {
-                      const copyIcon = e.target.querySelector(".copy-icon");
-                      if (copyIcon) copyIcon.style.display = "inline-block";
-                    }}
-                    onMouseLeave={(e) => {
-                      const copyIcon = e.target.querySelector(".copy-icon");
-                      if (copyIcon) copyIcon.style.display = "none";
-                    }}
-                  >
-                    {`Account #${i + 1} - ${account.slice(0, 8)}...${account.slice(
-                      -5
-                    )}`}
-                    <CopyOutlined
-                      className="copy-icon"
-                      style={{
-                        marginLeft: 10,
-                        fontSize: "17px",
-                        display: "none"
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(account);
-                        message.success("Address copied to clipboard");
-                      }}
-                    />
+                <Select.Option value="">All</Select.Option>
+                {tokens.map((token, i) => (
+                  <Select.Option value={token.address} key={i}>
+                    <Avatar shape="circle" size="small" src={token.icon} />{" "}
+                    {token.symbol}
                   </Select.Option>
                 ))}
               </Select>
-              <Button
-                type="primary"
-                shape="round"
-                disabled={loading}
-                onClick={handleConnectAccount}
+              <label htmlFor="search">Stream Type:</label>
+              <Select
+                defaultValue=""
+                style={{ width: 120 }}
+                value={searchFilter?.type || ""}
+                onChange={(val) =>
+                  setSearchFilter({ ...searchFilter, type: val })
+                }
               >
-                Connect
+                <Select.Option value="">All</Select.Option>
+                <Select.Option value="INCOMING">
+                  <Tag color="green">INCOMING</Tag>
+                </Select.Option>
+                <Select.Option value="OUTGOING">
+                  <Tag color="blue">OUTGOING</Tag>
+                </Select.Option>
+                <Select.Option value="TERMINATED">
+                  <Tag color="red">TERMINATED</Tag>
+                </Select.Option>
+              </Select>
+              <Input.Search
+                placeholder="Search by address"
+                value={searchFilter?.searchInput || ""}
+                enterButton
+                allowClear
+                onSearch={getStreams}
+                onChange={(e) =>
+                  setSearchFilter({
+                    ...searchFilter,
+                    searchInput: e.target.value
+                  })
+                }
+              />
+              <Button type="primary" onClick={getStreams}>
+                <SyncOutlined />
               </Button>
             </Space>
-            {account && (
-              <div>
-                {/* Create Stream Section Starts */}
-                <Card
-                  bordered
-                  title="Create Stream"
-                  className={styles.cardContainer}
-                  actions={[
-                    <Button
-                      key="create"
-                      type="primary"
-                      shape="round"
-                      style={{ marginTop: 10 }}
-                      disabled={loading}
-                      loading={loading}
-                      onClick={() => handleCreateStream(streamInput)}
-                    >
-                      Send
-                    </Button>
-                  ]}
-                >
-                  <Input
-                    type="text"
-                    placeholder="Receiver Wallet Address"
-                    name="receiver"
-                    value={streamInput.receiver || ""}
-                    onChange={(e) =>
-                      setStreamInput({
-                        ...streamInput,
-                        receiver: e.target.value
-                      })
-                    }
-                    style={{
-                      borderRadius: 10,
-                      marginBottom: 10
-                    }}
-                  />
-                  <Space>
-                    <label htmlFor="token">Select Token:</label>
-                    <Select
-                      defaultValue={tokens[0].symbol}
-                      name="token"
-                      id="token"
-                      value={streamInput?.token || tokens[0].address}
-                      style={{
-                        borderRadius: 10,
-                        marginBottom: 10
-                      }}
-                      onChange={(val) =>
-                        setStreamInput({ ...streamInput, token: val })
-                      }
-                    >
-                      {tokens.map((token, i) => (
-                        <Select.Option value={token.address} key={i}>
-                          <Avatar
-                            shape="circle"
-                            size="small"
-                            src={token.icon}
-                          />{" "}
-                          {token.symbol}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                    {/*  add flowrate input */}
-                    <Input
-                      type="number"
-                      name="flowRate"
-                      addonAfter="/month"
-                      placeholder="Flowrate in no. of tokens"
-                      value={streamInput?.flowRate}
-                      onChange={(e) =>
-                        setStreamInput({ ...streamInput, flowRate: e.target.value })
-                      }
-                      style={{
-                        borderRadius: 10,
-                        marginBottom: 10
-                        // width: 120
-                      }}
-                    />
-                  </Space>
-                </Card>
-                {/* Create Stream Section Ends */}
-                {/* Streams Table Starts */}
-                <h2>My Streams</h2>
-                <Space>
-                  <label htmlFor="search">Token:</label>
-                  <Select
-                    defaultValue=""
-                    style={{ width: 120 }}
-                    value={searchFilter?.token || ""}
-                    onChange={(val) =>
-                      setSearchFilter({ ...searchFilter, token: val })
-                    }
-                  >
-                    <Select.Option value="">All</Select.Option>
-                    {tokens.map((token, i) => (
-                      <Select.Option value={token.address} key={i}>
-                        <Avatar shape="circle" size="small" src={token.icon} />{" "}
-                        {token.symbol}
-                      </Select.Option>
-                    ))}
-                  </Select>
-                  <label htmlFor="search">Stream Type:</label>
-                  <Select
-                    defaultValue=""
-                    style={{ width: 120 }}
-                    value={searchFilter?.type || ""}
-                    onChange={(val) =>
-                      setSearchFilter({ ...searchFilter, type: val })
-                    }
-                  >
-                    <Select.Option value="">All</Select.Option>
-                    <Select.Option value="INCOMING">
-                      <Tag color="green">INCOMING</Tag>
-                    </Select.Option>
-                    <Select.Option value="OUTGOING">
-                      <Tag color="blue">OUTGOING</Tag>
-                    </Select.Option>
-                    <Select.Option value="TERMINATED">
-                      <Tag color="red">TERMINATED</Tag>
-                    </Select.Option>
-                  </Select>
-                  <Input.Search
-                    placeholder="Search by address"
-                    value={searchFilter?.searchInput || ""}
-                    enterButton
-                    allowClear
-                    onSearch={getStreams}
-                    onChange={(e) =>
-                      setSearchFilter({
-                        ...searchFilter,
-                        searchInput: e.target.value
-                      })
-                    }
-                  />
-                  <Button type="primary" onClick={getStreams}>
-                    <SyncOutlined />
-                  </Button>
-                </Space>
-                <Table
-                  className="table_grid"
-                  columns={columns}
-                  rowKey="id"
-                  dataSource={streams}
-                  scroll={{ x: 970 }}
-                  loading={dataLoading}
-                  pagination={{
-                    pageSizeOptions: [5, 10, 20, 25, 50, 100],
-                    showSizeChanger: true,
-                    showQuickJumper: true,
-                    defaultCurrent: 1,
-                    defaultPageSize: 10,
-                    size: "small"
-                  }}
-                />
-                {/* Streams Table Ends */}
-              </div>
-            )}
-          </Content>
-          <Footer style={{ textAlign: "center" }}>
-            <a
-              href="https://github.com/Salmandabbakuti"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              © {new Date().getFullYear()} Salman Dabbakuti. Powered by
-              Superfluid
-            </a>
-          </Footer>
-        </Layout>
-      </Layout>
-    </>
+            <Table
+              className="table_grid"
+              columns={columns}
+              rowKey="id"
+              dataSource={streams}
+              scroll={{ x: 970 }}
+              loading={dataLoading}
+              pagination={{
+                pageSizeOptions: [5, 10, 20, 25, 50, 100],
+                showSizeChanger: true,
+                showQuickJumper: true,
+                defaultCurrent: 1,
+                defaultPageSize: 10,
+                size: "small"
+              }}
+            />
+            {/* Streams Table Ends */}
+          </div>
+        )}
+      </Content>
+      <Footer style={{ textAlign: "center" }}>
+        <a
+          href="https://github.com/Salmandabbakuti"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          © {new Date().getFullYear()} Salman Dabbakuti. Powered by Superfluid
+        </a>
+        <p style={{ fontSize: "12px" }}>v0.0.5</p>
+      </Footer>
+    </Layout>
   );
 }
