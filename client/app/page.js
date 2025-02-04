@@ -417,7 +417,7 @@ export default function Home() {
             {accounts.map((acc, i) => (
               <Select.Option
                 value={i}
-                key={i}
+                key={acc}
                 onMouseEnter={(e) => {
                   const copyIcon = e.target.querySelector(".copy-icon");
                   if (copyIcon) copyIcon.style.display = "inline-block";
@@ -487,8 +487,8 @@ export default function Home() {
                 />
               }
             >
-              {tokens.map((token, i) => (
-                <Space key={i}>
+              {tokens.map((token) => (
+                <Space key={token.address}>
                   <Avatar shape="circle" size="small" src={token.icon} />
                   <span>{token.symbol}</span>
                   <span>
@@ -548,8 +548,8 @@ export default function Home() {
                     setStreamInput({ ...streamInput, token: val })
                   }
                 >
-                  {tokens.map((token, i) => (
-                    <Select.Option value={token.address} key={i}>
+                  {tokens.map((token) => (
+                    <Select.Option value={token.address} key={token.address}>
                       <Avatar shape="circle" size="small" src={token.icon} />{" "}
                       {token.symbol}
                     </Select.Option>
@@ -587,8 +587,8 @@ export default function Home() {
                 }
               >
                 <Select.Option value="">All</Select.Option>
-                {tokens.map((token, i) => (
-                  <Select.Option value={token.address} key={i}>
+                {tokens.map((token) => (
+                  <Select.Option value={token.address} key={token.address}>
                     <Avatar shape="circle" size="small" src={token.icon} />{" "}
                     {token.symbol}
                   </Select.Option>
